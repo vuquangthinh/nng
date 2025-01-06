@@ -43,9 +43,8 @@ obtained via xref:nng_aio_result.3.adoc[`nng_aio_result()`].
 That result will either be zero or an error code.
 
 NOTE: Consider using the
-xref:nng_http_client_transact.3http.adoc[`nng_http_client_transact()`] or
-xref:nng_http_conn_transact.3http.adoc[`nng_http_conn_transact()`] functions,
-which provide a simpler interface for performing a complete HTTP client
+xref:nng_http_conn_transact.3http.adoc[`nng_http_conn_transact()`] function,
+which provides a simpler interface for performing a complete HTTP client
 transaction.
 
 == RETURN VALUES
@@ -69,7 +68,6 @@ xref:nng_aio_alloc.3.adoc[nng_aio_alloc(3)],
 xref:nng_aio_result.3.adoc[nng_aio_result(3)],
 xref:nng_strerror.3.adoc[nng_strerror(3)],
 xref:nng_http_client_connect.3http.adoc[nng_http_client_connect(3http)],
-xref:nng_http_client_transact.3http.adoc[nng_http_client_transact(3http)],
 xref:nng_http_conn_transact.3http.adoc[nng_http_conn_transact(3http)],
 xref:nng_http_conn_read_all.3http.adoc[nng_http_conn_read_all(3http)],
 xref:nng.7.adoc[nng(7)]

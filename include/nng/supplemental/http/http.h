@@ -532,12 +532,6 @@ NNG_DECL void nng_http_client_connect(nng_http_client *, nng_aio *);
 // the connection if the aio does not complete successfully.
 NNG_DECL void nng_http_conn_transact(nng_http_conn *, nng_aio *);
 
-// nng_http_client_transact is used to execute a single transaction to a
-// server. The connection is opened, and will be closed when the transaction is
-// complete.
-NNG_DECL void nng_http_client_transact(
-    nng_http_client *, nng_http_req *, nng_http_res *, nng_aio *);
-
 #ifdef __cplusplus
 }
 #endif

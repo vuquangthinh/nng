@@ -891,20 +891,6 @@ nng_http_client_connect(nng_http_client *cli, nng_aio *aio)
 }
 
 void
-nng_http_client_transact(
-    nng_http_client *cli, nng_http_req *req, nng_http_res *res, nng_aio *aio)
-{
-#ifdef NNG_SUPP_HTTP
-	nni_http_transact(cli, req, res, aio);
-#else
-	NNI_ARG_UNUSED(cli);
-	NNI_ARG_UNUSED(req);
-	NNI_ARG_UNUSED(res);
-	nni_aio_finish_error(aio, NNG_ENOTSUP);
-#endif
-}
-
-void
 nng_http_conn_transact(nng_http_conn *conn, nng_aio *aio)
 {
 #ifdef NNG_SUPP_HTTP

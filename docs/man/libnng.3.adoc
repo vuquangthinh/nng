@@ -153,7 +153,6 @@ These functions are intended for use with HTTP client applications.
 |xref:nng_http_client_free.3http.adoc[nng_http_client_free()]|free HTTP client
 |xref:nng_http_client_get_tls.3http.adoc[nng_http_client_get_tls()]|get HTTP client TLS configuration
 |xref:nng_http_client_set_tls.3http.adoc[nng_http_client_set_tls()]|set HTTP client TLS configuration
-|xref:nng_http_client_transact.3http.adoc[nng_http_client_transact()]|perform one HTTP transaction
 |xref:nng_http_conn_transact.3http.adoc[nng_http_conn_transact()]|perform one HTTP transaction on connection
 |===
 

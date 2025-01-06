@@ -116,19 +116,23 @@ TestMain("HTTP Client", {
 		});
 
 		Convey("One off exchange works", {
-			nng_http_req *req;
-			nng_http_res *res;
-			void         *data;
-			size_t        len;
+			nng_http_conn *conn;
+			nng_http_req  *req;
+			nng_http_res  *res;
+			void          *data;
+			size_t         len;
 
-			So(nng_http_req_alloc(&req, url) == 0);
-			So(nng_http_res_alloc(&res) == 0);
-			Reset({
-				nng_http_req_free(req);
-				nng_http_res_free(res);
-			});
+			nng_http_client_connect(cli, aio);
+			nng_aio_wait(aio);
+			So(nng_aio_result(aio) == 0);
+			conn = nng_aio_get_output(aio, 0);
+			Reset({ nng_http_conn_close(conn); });
 
-			nng_http_client_transact(cli, req, res, aio);
+			req = nng_http_conn_req(conn);
+			res = nng_http_conn_res(conn);
+			So(nng_http_req_set_url(req, url) == 0);
+
+			nng_http_conn_transact(conn, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
 			So(nng_http_res_get_status(res) == 200);
@@ -180,27 +184,29 @@ TestMain("HTTP Client", {
 		nng_url         *url;
 		nng_http_req    *req;
 		nng_http_res    *res;
+		nng_http_conn   *conn;
 
 		So(nng_aio_alloc(&aio, NULL, NULL) == 0);
 
 		So(nng_url_parse(&url, "http://httpbin.org/delay/30") == 0);
 
 		So(nng_http_client_alloc(&cli, url) == 0);
-		So(nng_http_req_alloc(&req, url) == 0);
-		So(nng_http_res_alloc(&res) == 0);
-
+		nng_http_client_connect(cli, aio);
+		nng_aio_wait(aio);
+		So(nng_aio_result(aio) == 0);
+		conn = nng_aio_get_output(aio, 0);
+		req  = nng_http_conn_req(conn);
+		res  = nng_http_conn_res(conn);
 		Reset({
 			nng_http_client_free(cli);
 			nng_url_free(url);
 			nng_aio_free(aio);
-			nng_http_req_free(req);
-			nng_http_res_free(res);
 		});
 		nng_aio_set_timeout(aio, 10); // 10 msec timeout
 
 		So(nng_http_req_set_header(req, "Cache-Control", "no-cache") ==
 		    0);
-		nng_http_client_transact(cli, req, res, aio);
+		nng_http_conn_transact(conn, aio);
 		nng_aio_wait(aio);
 		So(nng_aio_result(aio) == NNG_ETIMEDOUT);
 	});
@@ -227,19 +233,21 @@ TestMain("HTTP Client", {
 		});
 
 		Convey("One off exchange works", {
-			nng_http_req *req;
-			nng_http_res *res;
-			void         *data;
-			size_t        len;
+			nng_http_req  *req;
+			nng_http_res  *res;
+			void          *data;
+			size_t         len;
+			nng_http_conn *conn;
 
-			So(nng_http_req_alloc(&req, url) == 0);
-			So(nng_http_res_alloc(&res) == 0);
-			Reset({
-				nng_http_req_free(req);
-				nng_http_res_free(res);
-			});
-
-			nng_http_client_transact(cli, req, res, aio);
+			nng_http_client_connect(cli, aio);
+			nng_aio_wait(aio);
+			So(nng_aio_result(aio) == 0);
+			conn = nng_aio_get_output(aio, 0);
+			req  = nng_http_conn_req(conn);
+			res  = nng_http_conn_res(conn);
+			Reset({ nng_http_conn_close(conn); });
+			So(nng_http_req_set_url(req, url) == 0);
+			nng_http_conn_transact(conn, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
 			So(nng_http_res_get_status(res) == 200);
