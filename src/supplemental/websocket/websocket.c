@@ -1662,7 +1662,7 @@ ws_handler(nng_http_conn *conn, void *arg, nng_aio *aio)
 	return;
 
 err:
-	if ((rv = nni_http_res_set_error(res, status)) != 0) {
+	if ((rv = nni_http_conn_set_error(conn, status, NULL, NULL)) != 0) {
 		nni_aio_finish_error(aio, rv);
 	} else {
 		nni_aio_set_output(aio, 0, res);

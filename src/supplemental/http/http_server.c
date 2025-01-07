@@ -64,8 +64,7 @@ typedef struct http_sconn {
 typedef struct http_error {
 	nni_list_node node;
 	uint16_t      code;
-	void         *body;
-	size_t        len;
+	char         *body;
 } http_error;
 
 struct nng_http_server {
@@ -727,14 +726,19 @@ http_sconn_cbdone(void *arg)
 	res = nni_http_conn_res(sc->conn);
 	if (!nni_http_conn_res_sent(sc->conn)) {
 		const char *val;
-		val = nni_http_res_get_header(res, "Connection");
+		const char *method;
+		uint16_t    status;
+		val    = nni_http_res_get_header(res, "Connection");
+		status = nni_http_conn_get_status(sc->conn);
+		method = nni_http_conn_get_method(sc->conn);
 		if ((val != NULL) && (strstr(val, "close") != NULL)) {
 			sc->close = true;
 		}
 		if (sc->close) {
 			nni_http_res_set_header(res, "Connection", "close");
 		}
-		if (strcmp(nni_http_conn_get_method(sc->conn), "HEAD") == 0) {
+		if ((strcmp(method, "HEAD") == 0) && status >= 200 &&
+		    status <= 299) {
 			void  *data;
 			size_t size;
 			// prune off the data, but preserve the content-length
@@ -845,7 +849,7 @@ http_server_fini(nni_http_server *s)
 	nni_mtx_lock(&s->errors_mtx);
 	while ((epage = nni_list_first(&s->errors)) != NULL) {
 		nni_list_remove(&s->errors, epage);
-		nni_free(epage->body, epage->len);
+		nni_strfree(epage->body);
 		NNI_FREE_STRUCT(epage);
 	}
 	nni_mtx_unlock(&s->errors_mtx);
@@ -1024,7 +1028,7 @@ nni_http_server_close(nni_http_server *s)
 }
 
 static int
-http_server_set_err(nni_http_server *s, uint16_t code, void *body, size_t len)
+http_server_set_err(nni_http_server *s, uint16_t code, char *body)
 {
 	http_error *epage;
 
@@ -1042,11 +1046,8 @@ http_server_set_err(nni_http_server *s, uint16_t code, void *body, size_t len)
 		epage->code = code;
 		nni_list_append(&s->errors, epage);
 	}
-	if (epage->len != 0) {
-		nni_free(epage->body, epage->len);
-	}
+	nni_strfree(epage->body);
 	epage->body = body;
-	epage->len  = len;
 	nni_mtx_unlock(&s->errors_mtx);
 	return (0);
 }
@@ -1055,34 +1056,15 @@ int
 nni_http_server_set_error_page(
     nni_http_server *s, uint16_t code, const char *html)
 {
-	char  *body;
-	int    rv;
-	size_t len;
+	char *body;
+	int   rv;
 
 	// We copy the content, without the trailing NUL.
-	len = strlen(html);
-	if ((body = nni_alloc(len)) == NULL) {
+	if ((body = nni_strdup(html)) == NULL) {
 		return (NNG_ENOMEM);
 	}
-	memcpy(body, html, len);
-	if ((rv = http_server_set_err(s, code, body, len)) != 0) {
-		nni_free(body, len);
-	}
-	return (rv);
-}
-
-int
-nni_http_server_set_error_file(
-    nni_http_server *s, uint16_t code, const char *path)
-{
-	void  *body;
-	size_t len;
-	int    rv;
-	if ((rv = nni_file_get(path, &body, &len)) != 0) {
-		return (rv);
-	}
-	if ((rv = http_server_set_err(s, code, body, len)) != 0) {
-		nni_free(body, len);
+	if ((rv = http_server_set_err(s, code, body)) != 0) {
+		nni_strfree(body);
 	}
 	return (rv);
 }
@@ -1090,41 +1072,20 @@ nni_http_server_set_error_file(
 int
 nni_http_server_error(nni_http_server *s, nng_http *conn)
 {
-	http_error   *epage;
-	char         *body = NULL;
-	char         *html = NULL;
-	size_t        len  = 0;
-	nng_http_res *res  = nni_http_conn_res(conn);
-	uint16_t      code = nni_http_conn_get_status(conn);
-	int           rv;
+	http_error *epage;
+	char       *body = NULL;
+	uint16_t    code = nni_http_conn_get_status(conn);
+	int         rv;
 
 	nni_mtx_lock(&s->errors_mtx);
 	NNI_LIST_FOREACH (&s->errors, epage) {
 		if (epage->code == code) {
 			body = epage->body;
-			len  = epage->len;
 			break;
 		}
 	}
+	rv = nni_http_conn_set_error(conn, code, NULL, body);
 	nni_mtx_unlock(&s->errors_mtx);
-
-	if (body == NULL) {
-		if ((rv = nni_http_alloc_html_error(&html, code, NULL)) != 0) {
-			return (rv);
-		}
-		body = html;
-		len  = strlen(body);
-	}
-
-	// NB: The server lock has to be held here to guard against the
-	// error page being tossed or changed.
-	if (((rv = nni_http_res_copy_data(res, body, len)) == 0) &&
-	    ((rv = nni_http_res_set_header(
-	          res, "Content-Type", "text/html; charset=UTF-8")) == 0)) {
-		nni_http_conn_set_status(conn, code);
-	}
-	nni_strfree(html);
-
 	return (rv);
 }
 
@@ -1355,7 +1316,8 @@ http_handle_file(nng_http *conn, void *arg, nni_aio *aio)
 			status = NNG_HTTP_STATUS_INTERNAL_SERVER_ERROR;
 			break;
 		}
-		if ((rv = nni_http_res_set_error(res, status)) != 0) {
+		if ((rv = nni_http_conn_set_error(conn, status, NULL, NULL)) !=
+		    0) {
 			nni_aio_finish_error(aio, rv);
 			return;
 		}
@@ -1543,7 +1505,8 @@ http_handle_dir(nng_http *conn, void *arg, nng_aio *aio)
 			status = NNG_HTTP_STATUS_INTERNAL_SERVER_ERROR;
 			break;
 		}
-		if ((rv = nni_http_res_set_error(res, status)) != 0) {
+		if ((rv = nni_http_conn_set_error(conn, status, NULL, NULL)) !=
+		    0) {
 			nni_aio_finish_error(aio, rv);
 			return;
 		}
@@ -1606,12 +1569,10 @@ typedef struct http_redirect {
 static void
 http_handle_redirect(nng_http *conn, void *data, nng_aio *aio)
 {
-	nni_http_res  *res  = nng_http_conn_res(conn);
-	nni_http_req  *req  = nng_http_conn_req(conn);
-	char          *html = NULL;
-	char          *msg  = NULL;
-	char          *loc  = NULL;
-	http_redirect *hr   = data;
+	nni_http_res  *res = nng_http_conn_res(conn);
+	nni_http_req  *req = nng_http_conn_req(conn);
+	char          *loc = NULL;
+	http_redirect *hr  = data;
 	int            rv;
 	const char    *base;
 	const char    *uri;
@@ -1630,28 +1591,17 @@ http_handle_redirect(nng_http *conn, void *data, nng_aio *aio)
 		loc = hr->where;
 	}
 
-	// Builtin redirect page
-	rv = nni_asprintf(&msg,
-	    "You should be automatically redirected to <a href=\"%s\">%s</a>.",
-	    loc, loc);
-
 	// Build a response.  We always close the connection for redirects,
 	// because it is probably going to another server.  This also
 	// keeps us from having to consume the entity body, we can just
 	// discard it.
-	if ((rv != 0) ||
-	    ((rv = nni_http_alloc_html_error(&html, hr->code, msg)) != 0) ||
-	    ((rv = nni_http_res_set_header(res, "Connection", "close")) !=
+	if (((rv = nni_http_conn_set_redirect(conn, hr->code, NULL, loc)) !=
 	        0) ||
-	    ((rv = nni_http_res_set_header(
-	          res, "Content-Type", "text/html; charset=UTF-8")) != 0) ||
-	    ((rv = nni_http_res_set_header(res, "Location", loc)) != 0) ||
-	    ((rv = nni_http_res_copy_data(res, html, strlen(html))) != 0)) {
+	    ((rv = nni_http_res_set_header(res, "Connection", "close")) !=
+	        0)) {
 		if (loc != hr->where) {
 			nni_strfree(loc);
 		}
-		nni_strfree(msg);
-		nni_strfree(html);
 		nni_aio_finish_error(aio, rv);
 		return;
 	}
@@ -1661,8 +1611,6 @@ http_handle_redirect(nng_http *conn, void *data, nng_aio *aio)
 	if (loc != hr->where) {
 		nni_strfree(loc);
 	}
-	nni_strfree(msg);
-	nni_strfree(html);
 	nni_aio_set_output(aio, 0, res);
 	nni_aio_finish(aio, 0, 0);
 }

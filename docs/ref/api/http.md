@@ -134,7 +134,7 @@ Status codes are defined by the IETF. Here are defininitions that NNG provides f
 | `NNG_HTTP_STATUS_TEAPOT`<a name="#NNG_HTTP_STATUS_TEAPOT"></a>                                   | 418  | I Am A Teapot                   | RFC 2324.                                             |
 | `NNG_HTTP_STATUS_UNPROCESSABLE_ENTITY`<a name="#NNG_HTTP_STATUS_UNPROCESSABLE_ENTITY"></a>       | 422  | Unprocessable Entity            |
 | `NNG_HTTP_STATUS_LOCKED`<a name="#NNG_HTTP_STATUS_LOCKED"></a>                                   | 423  | Locked                          |
-| `NNG_HTTP_STATUS_FAILED_DEPENDENCY`<a name="#NNG_HTTP_STATUS_FAILED_DEPEDNENCY"></a>             | 424  | Locked                          |
+| `NNG_HTTP_STATUS_FAILED_DEPENDENCY`<a name="#NNG_HTTP_STATUS_FAILED_DEPEDNENCY"></a>             | 424  | Failed Dependency               |
 | `NNG_HTTP_STATUS_TOO_EARLY`<a name="#NNG_HTTP_STATUS_TOO_EARLY"></a>                             | 425  | Too Early                       |
 | `NNG_HTTP_STATUS_UPGRADE_REQUIRED`<a name="#NNG_HTTP_STATUS_UPGRADE_REQUIRED"></a>               | 426  | Upgrade Required                |
 | `NNG_HTTP_STATUS_PRECONDITION_REQUIRED`<a name="#NNG_HTTP_STATUS_PRECONDITION_REQUIRED"></a>     | 428  | Precondition Required           |                                                       |

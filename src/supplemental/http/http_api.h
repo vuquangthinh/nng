@@ -139,17 +139,7 @@ extern const char *nni_http_req_get_uri(const nni_http_req *);
 extern int nni_http_req_set_uri(nni_http_req *, const char *);
 extern int nni_http_req_set_url(nni_http_req *, const nng_url *);
 
-// nni_http_res_is_error is true if the status was allocated as part of
-// nni_http_res_alloc_error().  This is a hint to the server to replace
-// the HTML body with customized content if it exists.
 extern bool nni_http_res_is_error(nni_http_res *);
-
-// nni_http_alloc_html_error allocates a string corresponding to an
-// HTML error.  This can be set as the body of the res.  The status
-// will be looked up using HTTP status code lookups, but the details
-// will be added if present as further body text.  The result can
-// be freed with nni_strfree() later.
-extern int nni_http_alloc_html_error(char **, uint16_t, const char *);
 
 extern void nni_http_read(nni_http_conn *, nni_aio *);
 extern void nni_http_read_full(nni_http_conn *, nni_aio *);
@@ -219,10 +209,6 @@ extern void nni_http_server_close(nni_http_server *);
 
 // nni_http_server_set_error_page sets an error page for the named status.
 extern int nni_http_server_set_error_page(
-    nni_http_server *, uint16_t, const char *);
-
-// nni_http_server_set_error_page sets an error file for the named status.
-extern int nni_http_server_set_error_file(
     nni_http_server *, uint16_t, const char *);
 
 // nni_http_server_res_error takes replaces the body of the res with
@@ -391,5 +377,16 @@ extern void        nni_http_conn_set_status(nng_http *conn, uint16_t status);
 extern uint16_t    nni_http_conn_get_status(nng_http *);
 extern const char *nni_http_conn_get_reason(nng_http *);
 extern int         nni_http_conn_set_reason(nng_http *, const char *);
+
+// nni_http_conn_set_error flags an error using the built in HTML page.
+// unless body is not NULL.  To pass no content, pass an empty string for body.
+extern int nni_http_conn_set_error(
+    nng_http *conn, uint16_t status, const char *reason, const char *body);
+
+// nni_http_conn_set_redirect is used to set the redirection.
+// It uses a built-in error page, with a message about the redirection, and
+// sets the response Location: header accordingly.
+extern int nni_http_conn_set_redirect(
+    nng_http *conn, uint16_t status, const char *reason, const char *dest);
 
 #endif // NNG_SUPPLEMENTAL_HTTP_HTTP_API_H

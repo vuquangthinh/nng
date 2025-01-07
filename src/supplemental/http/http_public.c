@@ -667,20 +667,6 @@ nng_http_server_set_error_page(
 }
 
 int
-nng_http_server_set_error_file(
-    nng_http_server *srv, uint16_t code, const char *path)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_server_set_error_file(srv, code, path));
-#else
-	NNI_ARG_UNUSED(srv);
-	NNI_ARG_UNUSED(code);
-	NNI_ARG_UNUSED(path);
-	return (NNG_ENOTSUP);
-#endif
-}
-
-int
 nng_http_server_set_tls(nng_http_server *srv, nng_tls_config *cfg)
 {
 #if defined(NNG_SUPP_HTTP) && defined(NNG_SUPP_TLS)

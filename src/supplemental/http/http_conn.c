@@ -698,8 +698,8 @@ nni_http_conn_get_status(nng_http *conn)
 	return (conn->res.code);
 }
 
-static const char *
-http_reason(uint16_t code)
+const char *
+nni_http_reason(uint16_t code)
 {
 	static struct {
 		uint16_t    code;
@@ -802,7 +802,8 @@ const char *
 nni_http_conn_get_reason(nng_http *conn)
 {
 #ifdef NNG_SUPP_HTTP
-	return (conn->res.rsn ? conn->res.rsn : http_reason(conn->res.code));
+	return (
+	    conn->res.rsn ? conn->res.rsn : nni_http_reason(conn->res.code));
 #else
 	return (NULL);
 #endif
@@ -811,13 +812,13 @@ nni_http_conn_get_reason(nng_http *conn)
 int
 nni_http_conn_set_reason(nng_http *conn, const char *reason)
 {
-	char *dup;
+	char *dup = NULL;
 	if ((reason != NULL) &&
 	    (strcmp(reason, nni_http_reason(conn->res.code)) == 0)) {
 		reason = NULL;
 		return (0);
 	}
-	if ((dup = nni_strdup(reason)) == NULL) {
+	if ((reason != NULL) && (dup = nni_strdup(reason)) == NULL) {
 		return (NNG_ENOMEM);
 	}
 	if (conn->res.rsn != NULL) {
@@ -825,6 +826,92 @@ nni_http_conn_set_reason(nng_http *conn, const char *reason)
 	}
 	conn->res.rsn = dup;
 	return (0);
+}
+
+static int
+http_conn_set_error(nng_http_conn *conn, uint16_t status, const char *reason,
+    const char *body, const char *redirect)
+{
+	int         rv;
+	char        content[1024];
+	const char *prefix = "<!DOCTYPE html>\n"
+	                     "<html><head><title>%d %s</title>\n"
+	                     "<style>"
+	                     "body { font-family: Arial, sans serif; "
+	                     "text-align: center }\n"
+	                     "h1 { font-size: 36px; }"
+	                     "span { background-color: gray; color: white; "
+	                     "padding: 7px; "
+	                     "border-radius: 5px }"
+	                     "h2 { font-size: 24px; }"
+	                     "p { font-size: 20px; }"
+	                     "</style></head>"
+	                     "<body><p>&nbsp;</p>"
+	                     "<h1><span>%d</span></h1>"
+	                     "<h2>%s</h2><p>";
+	const char *suffix = "</p></body></html>";
+
+	conn->res.code  = status;
+	conn->res.iserr = true;
+
+	if ((rv = nni_http_conn_set_reason(conn, reason)) != 0) {
+		return (rv);
+	}
+	reason = nni_http_conn_get_reason(conn);
+
+	if (body == NULL) {
+		snprintf(content, sizeof(content), prefix, status, reason,
+		    status, reason);
+		size_t avail = sizeof(content) - strlen(content);
+
+		if (redirect != NULL && strlen(redirect) > 200 &&
+		    strlen(reason) < 40) {
+			// URL is too long for buffer and unlikely to be useful
+			// to humans anyway.  600 bytes will fit in the 1K
+			// buffer without issue.  (Our prelude and trailer are
+			// less than 400 bytes.)
+			snprintf(content + strlen(content), avail,
+			    "You should be automatically redirected.");
+			avail = sizeof(content) - strlen(content);
+		} else if (redirect != NULL) {
+			// TODO: redirect should be URL encoded.
+			snprintf(content + strlen(content), avail,
+			    "You should be automatically redirected to <a "
+			    "href=\"%s\">%s</a>.",
+			    redirect, redirect);
+			avail = sizeof(content) - strlen(content);
+		}
+		snprintf(content + strlen(content), avail, "%s", suffix);
+		body = content;
+	}
+	if (strlen(body) > 0) {
+		if ((rv = nni_http_res_set_header(&conn->res, "Content-Type",
+		         "text/html; charset=UTF-8")) != 0) {
+			return (rv);
+		}
+		return (
+		    nni_http_res_copy_data(&conn->res, body, strlen(body)));
+	}
+	return (0);
+}
+
+int
+nni_http_conn_set_error(
+    nng_http_conn *conn, uint16_t status, const char *reason, const char *body)
+{
+	return (http_conn_set_error(conn, status, reason, body, NULL));
+}
+
+int
+nni_http_conn_set_redirect(nng_http_conn *conn, uint16_t status,
+    const char *reason, const char *redirect)
+{
+	int rv;
+	if ((rv = nni_http_res_set_header(&conn->res, "Location", redirect)) !=
+	    0) {
+		return (rv);
+	}
+	return (http_conn_set_error(conn, status, reason, NULL, redirect));
 }
 
 int
