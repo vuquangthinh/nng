@@ -17,7 +17,7 @@ nng_http_reset - reset HTTP connection state
 [source, c]
 ----
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
+#include <nng/http.h>
 
 void nng_http_reset(nng_http *conn);
 ----

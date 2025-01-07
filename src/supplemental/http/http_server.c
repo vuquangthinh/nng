@@ -20,7 +20,7 @@
 #include "core/nng_impl.h"
 
 #include "http_api.h"
-#include "nng/supplemental/http/http.h"
+#include "nng/http.h"
 
 #ifndef NNG_HTTP_MAX_URI
 #define NNG_HTTP_MAX_URI 1024

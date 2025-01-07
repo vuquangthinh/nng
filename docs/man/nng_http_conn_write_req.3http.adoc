@@ -18,7 +18,7 @@ nng_http_conn_write_req - write HTTP request
 [source, c]
 ----
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
+#include <nng/http.h>
 
 void nng_http_conn_write_req(nng_http_conn *conn, nng_aio *aio);
 ----

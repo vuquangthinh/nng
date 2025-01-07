@@ -15,7 +15,7 @@
 #include <string.h>
 
 #include "core/nng_impl.h"
-#include "nng/supplemental/http/http.h"
+#include "nng/http.h"
 #include "supplemental/tls/tls_api.h"
 
 #include "http_api.h"

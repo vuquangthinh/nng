@@ -18,7 +18,7 @@ nng_http_get_status - return HTTP status code
 [source, c]
 ----
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
+#include <nng/http.h>
 
 uint16_t nng_http_get_status(const nng_http *conn);
 ----

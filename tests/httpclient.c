@@ -14,8 +14,8 @@
 #include <arpa/inet.h>
 #endif
 
+#include <nng/http.h>
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
 
 #include "core/nng_impl.h"
 

@@ -18,7 +18,7 @@ nng_http_set_status - set HTTP status
 [source, c]
 ----
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
+#include <nng/http.h>
 
 void nng_http_set_status(nng_http *conn, uint16_t status);
 ----

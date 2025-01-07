@@ -9,8 +9,8 @@
 // found online at https://opensource.org/licenses/MIT.
 //
 
-#ifndef NNG_SUPPLEMENTAL_HTTP_HTTP_H
-#define NNG_SUPPLEMENTAL_HTTP_HTTP_H
+#ifndef NNG_HTTP_H
+#define NNG_HTTP_H
 
 // HTTP API.  Only present if HTTP support compiled into the library.
 // Functions will return NNG_ENOTSUP (or NULL or 0 as appropriate)
@@ -500,4 +500,4 @@ NNG_DECL void nng_http_conn_transact(nng_http_conn *, nng_aio *);
 }
 #endif
 
-#endif // NNG_H
+#endif // NNG_HTTP_H

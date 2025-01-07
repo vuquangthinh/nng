@@ -18,7 +18,7 @@ nng_http_conn_transact - perform one HTTP transaction on connection
 [source, c]
 ----
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
+#include <nng/http.h>
 
 void nng_http_conn_transact(nng_http_conn *conn, nng_http_req *req,
     nng_http_res *res, nng_aio *aio);

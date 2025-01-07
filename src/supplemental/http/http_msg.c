@@ -17,7 +17,7 @@
 #include "core/nng_impl.h"
 #include "http_api.h"
 #include "http_msg.h"
-#include "nng/supplemental/http/http.h"
+#include "nng/http.h"
 
 static int
 http_set_string(char **strp, const char *val)

@@ -18,7 +18,7 @@ nng_http_server_set_error_page - set custom HTTP error page
 [source, c]
 ----
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
+#include <nng/http.h>
 
 int nng_http_server_set_error_page(nng_http_server *server,
         uint16_t code, const char *html);

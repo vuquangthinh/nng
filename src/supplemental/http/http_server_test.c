@@ -12,8 +12,8 @@
 // Basic HTTP server tests.
 #include "core/defs.h"
 #include <complex.h>
+#include <nng/http.h>
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
 
 #include <nuts.h>
 

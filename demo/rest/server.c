@@ -32,11 +32,8 @@
 // GRFG
 //
 
+#include <nng/http.h>
 #include <nng/nng.h>
-#include <nng/protocol/reqrep0/rep.h>
-#include <nng/protocol/reqrep0/req.h>
-#include <nng/supplemental/http/http.h>
-#include <nng/supplemental/util/platform.h>
 
 #include <ctype.h>
 #include <stdio.h>

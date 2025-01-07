@@ -18,10 +18,11 @@ nng_http_get_reason - return HTTP response reason
 [source, c]
 ----
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
+#include <nng/http.h>
 
 const char *nng_http_get_reason(const nng_http *conn);
 ----
+
 
 == DESCRIPTION
 

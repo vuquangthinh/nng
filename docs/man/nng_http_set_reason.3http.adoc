@@ -18,7 +18,7 @@ nng_http_set_reason - set HTTP response reason
 [source, c]
 ----
 #include <nng/nng.h>
-#include <nng/supplemental/http/http.h>
+#include <nng/http.h>
 
 int nng_http_set_reason(nng_http *conn, const char *reason);
 ----

@@ -13,7 +13,7 @@
 #define NNG_SUPPLEMENTAL_HTTP_HTTP_API_H
 
 #include "core/nng_impl.h"
-#include <nng/supplemental/http/http.h>
+#include "nng/http.h"
 
 // This represents the "internal" HTTP API.  It should not be used
 // or exposed to applications directly.
