@@ -43,7 +43,7 @@ extern void  nni_http_req_get_data(nni_http_req *, void **, size_t *);
 
 extern void  nni_http_res_init(nni_http_res *);
 extern void  nni_http_res_reset(nni_http_res *);
-extern int   nni_http_res_get_buf(nni_http_res *, void **, size_t *);
+extern int   nni_http_res_get_buf(nni_http_conn *, void **, size_t *);
 extern int   nni_http_res_parse(nng_http *, void *, size_t, size_t *);
 extern void  nni_http_res_get_data(nni_http_res *, void **, size_t *);
 extern char *nni_http_res_headers(nni_http_res *);
@@ -134,15 +134,10 @@ extern int nni_http_req_set_data(nni_http_req *, const void *, size_t);
 extern int nni_http_res_set_data(nni_http_res *, const void *, size_t);
 extern int nni_http_req_alloc_data(nni_http_req *, size_t);
 extern int nni_http_res_alloc_data(nni_http_res *, size_t);
-extern const char *nni_http_req_get_method(const nni_http_req *);
 extern const char *nni_http_req_get_uri(const nni_http_req *);
-extern void        nni_http_req_set_method(nni_http_req *, const char *);
-extern int         nni_http_req_set_uri(nni_http_req *, const char *);
-extern int         nni_http_req_set_url(nni_http_req *, const nng_url *);
-extern uint16_t    nni_http_res_get_status(const nni_http_res *);
-extern void        nni_http_res_set_status(nni_http_res *, uint16_t);
-extern const char *nni_http_res_get_reason(const nni_http_res *);
-extern int         nni_http_res_set_reason(nni_http_res *, const char *);
+
+extern int nni_http_req_set_uri(nni_http_req *, const char *);
+extern int nni_http_req_set_url(nni_http_req *, const nng_url *);
 
 // nni_http_res_is_error is true if the status was allocated as part of
 // nni_http_res_alloc_error().  This is a hint to the server to replace
@@ -233,7 +228,7 @@ extern int nni_http_server_set_error_file(
 // nni_http_server_res_error takes replaces the body of the res with
 // a custom error page previously set for the server, using the status
 // of the res.  The res must have the status set first.
-extern int nni_http_server_res_error(nni_http_server *, nni_http_res *);
+extern int nni_http_server_error(nni_http_server *, nng_http *);
 
 // nni_http_hijack is intended to be called by a handler that wishes to
 // take over the processing of the HTTP session -- usually to change protocols
@@ -388,5 +383,13 @@ extern bool nni_http_conn_res_sent(nni_http_conn *conn);
 
 extern const char *nni_http_conn_get_version(nng_http *conn);
 extern int         nni_http_conn_set_version(nng_http *conn, const char *vers);
+
+extern void nni_http_conn_set_method(nng_http *conn, const char *method);
+extern const char *nni_http_conn_get_method(nng_http *conn);
+
+extern void        nni_http_conn_set_status(nng_http *conn, uint16_t status);
+extern uint16_t    nni_http_conn_get_status(nng_http *);
+extern const char *nni_http_conn_get_reason(nng_http *);
+extern int         nni_http_conn_set_reason(nng_http *, const char *);
 
 #endif // NNG_SUPPLEMENTAL_HTTP_HTTP_API_H

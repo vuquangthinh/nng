@@ -95,9 +95,6 @@ enum nng_http_status {
 // nng_http_req represents an HTTP request.
 typedef struct nng_http_req nng_http_req;
 
-// nng_http_req_get_method returns the method.
-NNG_DECL const char *nng_http_req_get_method(const nng_http_req *);
-
 // nng_http_req_get_uri returns the "abs-uri", which is URL without
 // the scheme, host, or port.
 NNG_DECL const char *nng_http_req_get_uri(const nng_http_req *);
@@ -119,11 +116,6 @@ NNG_DECL int nng_http_req_del_header(nng_http_req *, const char *);
 // if not found.
 NNG_DECL const char *nng_http_req_get_header(
     const nng_http_req *, const char *);
-
-// nng_http_req_set_method is used to change the method of a request.
-// The method should be an upper case HTTP method, like POST, or DELETE.
-// Null sets the default ("GET").
-NNG_DECL void nng_http_req_set_method(nng_http_req *, const char *);
 
 // nng_http_req_set_url is used to change the URL of a request.
 NNG_DECL int nng_http_req_set_url(nng_http_req *, const nng_url *);
@@ -151,20 +143,6 @@ NNG_DECL void nng_http_req_get_data(nng_http_req *, void **, size_t *);
 
 // nng_http_res represents an HTTP response.
 typedef struct nng_http_res nng_http_res;
-
-// nng_http_res_get_status returns the HTTP status code from the server.
-NNG_DECL uint16_t nng_http_res_get_status(const nng_http_res *);
-
-// nng_http_res_set_status sets the HTTP status code.
-NNG_DECL void nng_http_res_set_status(nng_http_res *, uint16_t);
-
-// nng_http_res_get_reason returns the human readable status message
-// that the server responds (or responded) with.
-NNG_DECL const char *nng_http_res_get_reason(const nng_http_res *);
-
-// nng_http_res_set_reason sets the human readable status message.
-// NULL means that a default reason is used based on the status code.
-NNG_DECL int nng_http_res_set_reason(nng_http_res *, const char *);
 
 // nng_http_res_set_header sets an HTTP header, replacing any previous value
 // that might have been present.
@@ -276,8 +254,17 @@ NNG_DECL int nng_http_set_version(nng_http *, const char *);
 // nng_http_get_version is used to get the version of a request.
 NNG_DECL const char *nng_http_get_version(nng_http *);
 
+// nng_http_set_method is used to change the method of a request.
+// The method should be an upper case HTTP method, like POST, or DELETE.
+// Null sets the default ("GET").
+NNG_DECL void nng_http_set_method(nng_http *, const char *);
+
+// nng_http_get_method returns the method.
+NNG_DECL const char *nng_http_get_method(nng_http *);
+
 // nng_http_handler is a handler used on the server side to handle HTTP
 // requests coming into a specific URL.
+//
 typedef struct nng_http_handler nng_http_handler;
 
 // nng_http_handler_alloc creates a server handler object, for the supplied
@@ -458,7 +445,7 @@ NNG_DECL int nng_http_server_set_error_file(
 // a custom error page previously set for the server, using the status
 // of the response.  The response must have the status set first using
 // nng_http_res_set_status.
-NNG_DECL int nng_http_server_res_error(nng_http_server *, nng_http_res *);
+NNG_DECL int nng_http_server_error(nng_http_server *, nng_http *);
 
 // nng_http_hijack is intended to be called by a handler that wishes to
 // take over the processing of the HTTP session -- usually to change protocols

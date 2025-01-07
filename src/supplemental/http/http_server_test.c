@@ -138,7 +138,7 @@ httpecho(nng_http_conn *conn, void *arg, nng_aio *aio)
 		nng_aio_finish(aio, rv);
 		return;
 	}
-	nng_http_res_set_status(res, NNG_HTTP_STATUS_OK);
+	nng_http_set_status(conn, NNG_HTTP_STATUS_OK);
 	nng_aio_set_output(aio, 0, res);
 	nng_aio_finish(aio, 0);
 }
@@ -229,8 +229,7 @@ test_server_basic(void)
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));
 
-	NUTS_TRUE(nng_http_res_get_status(nng_http_conn_res(st.conn)) ==
-	    NNG_HTTP_STATUS_OK);
+	NUTS_TRUE(nng_http_get_status(st.conn) == NNG_HTTP_STATUS_OK);
 
 	ptr = nng_http_res_get_header(
 	    nng_http_conn_res(st.conn), "Content-Length");
@@ -266,8 +265,7 @@ test_server_404(void)
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));
 
-	NUTS_TRUE(nng_http_res_get_status(nng_http_conn_res(st.conn)) ==
-	    NNG_HTTP_STATUS_NOT_FOUND);
+	NUTS_TRUE(nng_http_get_status(st.conn) == NNG_HTTP_STATUS_NOT_FOUND);
 
 	server_free(&st);
 }
@@ -290,7 +288,8 @@ test_server_bad_version(void)
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));
 
-	NUTS_TRUE(nng_http_res_get_status(nng_http_conn_res(st.conn)) == 505);
+	NUTS_TRUE(nng_http_get_status(st.conn) ==
+	    NNG_HTTP_STATUS_HTTP_VERSION_NOT_SUPP);
 
 	server_free(&st);
 }
@@ -343,7 +342,7 @@ test_server_wrong_method(void)
 
 	server_setup(&st, h);
 
-	nng_http_req_set_method(st.req, "POST");
+	nng_http_set_method(st.conn, "POST");
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/home.html"));
 	nng_http_conn_write_req(st.conn, st.aio);
 
@@ -381,7 +380,7 @@ test_server_post_handler(void)
 
 	nng_http_req_set_uri(st.req, "/post");
 	nng_http_req_set_data(st.req, txdata, strlen(txdata));
-	nng_http_req_set_method(st.req, "POST");
+	nng_http_set_method(st.conn, "POST");
 	NUTS_PASS(httpdo(&st, (void **) &rxdata, &size));
 	NUTS_TRUE(nng_http_get_status(st.conn) == NNG_HTTP_STATUS_OK);
 	NUTS_TRUE(size == strlen(txdata));
@@ -391,7 +390,7 @@ test_server_post_handler(void)
 	server_reset(&st);
 
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/post"));
-	nng_http_req_set_method(st.req, "GET");
+	nng_http_set_method(st.conn, "GET");
 	NUTS_PASS(nng_http_req_set_data(st.req, txdata, strlen(txdata)));
 
 	NUTS_PASS(httpdo(&st, &data, &size));
@@ -419,7 +418,7 @@ test_server_get_redirect(void)
 	server_setup(&st, h);
 
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/here"));
-	nng_http_req_set_method(st.req, "GET");
+	nng_http_set_method(st.conn, "GET");
 
 	NUTS_PASS(httpdo(&st, &data, &size));
 	NUTS_TRUE(nng_http_get_status(st.conn) == 303);
@@ -450,7 +449,7 @@ test_server_tree_redirect(void)
 	server_setup(&st, h);
 
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/here/i/go/again"));
-	nng_http_req_set_method(st.req, "GET");
+	nng_http_set_method(st.conn, "GET");
 
 	NUTS_PASS(httpdo(&st, &data, &size));
 	NUTS_TRUE(nng_http_get_status(st.conn) == 303);
@@ -482,7 +481,7 @@ test_server_post_redirect(void)
 	snprintf(txdata, sizeof(txdata), "1234");
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/here"));
 	nng_http_req_set_data(st.req, txdata, strlen(txdata));
-	nng_http_req_set_method(st.req, "POST");
+	nng_http_set_method(st.conn, "POST");
 	NUTS_PASS(httpdo(&st, (void **) &data, &size));
 	NUTS_TRUE(nng_http_get_status(st.conn) == 301);
 	dest = nng_http_res_get_header(nng_http_conn_res(st.conn), "Location");
@@ -509,7 +508,7 @@ test_server_post_echo_tree(void)
 
 	snprintf(txdata, sizeof(txdata), "1234");
 	nng_http_req_set_data(st.req, txdata, strlen(txdata));
-	nng_http_req_set_method(st.req, "POST");
+	nng_http_set_method(st.conn, "POST");
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/some_sub/directory"));
 	NUTS_PASS(httpdo(&st, (void **) &rxdata, &size));
 	NUTS_TRUE(nng_http_get_status(st.conn) == NNG_HTTP_STATUS_OK);
@@ -847,7 +846,7 @@ test_serve_index_not_post(void)
 	server_setup(&st, h);
 
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/subdir2/index.html"));
-	nng_http_req_set_method(st.req, "POST");
+	nng_http_set_method(st.conn, "POST");
 	NUTS_PASS(httpget(&st, &data, &size, &stat, &ctype));
 	NUTS_TRUE(stat == NNG_HTTP_STATUS_METHOD_NOT_ALLOWED);
 	nng_strfree(ctype);

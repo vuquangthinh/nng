@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2025 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 // Copyright 2019 Devolutions <info@devolutions.net>
 //
@@ -11,6 +11,7 @@
 
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "core/nng_impl.h"
@@ -602,7 +603,7 @@ nni_http_write_res(nni_http_conn *conn, nni_aio *aio)
 	nng_http_res *res = nng_http_conn_res(conn);
 
 	conn->res_sent = true;
-	if ((rv = nni_http_res_get_buf(res, &buf, &bufsz)) != 0) {
+	if ((rv = nni_http_res_get_buf(conn, &buf, &bufsz)) != 0) {
 		nni_aio_finish_error(aio, rv);
 		return;
 	}
@@ -668,6 +669,159 @@ nni_http_conn_set_version(nng_http *conn, const char *vers)
 	return (NNG_ENOTSUP);
 }
 
+void
+nni_http_conn_set_method(nng_http *conn, const char *method)
+{
+	if (method == NULL) {
+		method = "GET";
+	}
+	// this may truncate the method, but nobody should be sending
+	// methods so long.
+	(void) snprintf(conn->req.meth, sizeof(conn->req.meth), "%s", method);
+}
+
+const char *
+nni_http_conn_get_method(nng_http *conn)
+{
+	return (conn->req.meth);
+}
+
+void
+nni_http_conn_set_status(nng_http *conn, uint16_t status)
+{
+	conn->res.code = status;
+}
+
+uint16_t
+nni_http_conn_get_status(nng_http *conn)
+{
+	return (conn->res.code);
+}
+
+static const char *
+http_reason(uint16_t code)
+{
+	static struct {
+		uint16_t    code;
+		const char *mesg;
+	} http_status[] = {
+		// 200, listed first because most likely
+		{ NNG_HTTP_STATUS_OK, "OK" },
+
+		// 100 series -- informational
+		{ NNG_HTTP_STATUS_CONTINUE, "Continue" },
+		{ NNG_HTTP_STATUS_SWITCHING, "Switching Protocols" },
+		{ NNG_HTTP_STATUS_PROCESSING, "Processing" },
+
+		// 200 series -- successful
+		{ NNG_HTTP_STATUS_CREATED, "Created" },
+		{ NNG_HTTP_STATUS_ACCEPTED, "Accepted" },
+		{ NNG_HTTP_STATUS_NOT_AUTHORITATIVE, "Not Authoritative" },
+		{ NNG_HTTP_STATUS_NO_CONTENT, "No Content" },
+		{ NNG_HTTP_STATUS_RESET_CONTENT, "Reset Content" },
+		{ NNG_HTTP_STATUS_PARTIAL_CONTENT, "Partial Content" },
+
+		// 300 series -- redirection
+		{ NNG_HTTP_STATUS_MULTIPLE_CHOICES, "Multiple Choices" },
+		{ NNG_HTTP_STATUS_STATUS_MOVED_PERMANENTLY,
+		    "Moved Permanently" },
+		{ NNG_HTTP_STATUS_FOUND, "Found" },
+		{ NNG_HTTP_STATUS_SEE_OTHER, "See Other" },
+		{ NNG_HTTP_STATUS_NOT_MODIFIED, "Not Modified" },
+		{ NNG_HTTP_STATUS_USE_PROXY, "Use Proxy" },
+		{ NNG_HTTP_STATUS_TEMPORARY_REDIRECT, "Temporary Redirect" },
+
+		// 400 series -- client errors
+		{ NNG_HTTP_STATUS_BAD_REQUEST, "Bad Request" },
+		{ NNG_HTTP_STATUS_UNAUTHORIZED, "Unauthorized" },
+		{ NNG_HTTP_STATUS_PAYMENT_REQUIRED, "Payment Required" },
+		{ NNG_HTTP_STATUS_FORBIDDEN, "Forbidden" },
+		{ NNG_HTTP_STATUS_NOT_FOUND, "Not Found" },
+		{ NNG_HTTP_STATUS_METHOD_NOT_ALLOWED, "Method Not Allowed" },
+		{ NNG_HTTP_STATUS_NOT_ACCEPTABLE, "Not Acceptable" },
+		{ NNG_HTTP_STATUS_PROXY_AUTH_REQUIRED,
+		    "Proxy Authentication Required" },
+		{ NNG_HTTP_STATUS_REQUEST_TIMEOUT, "Request Timeout" },
+		{ NNG_HTTP_STATUS_CONFLICT, "Conflict" },
+		{ NNG_HTTP_STATUS_GONE, "Gone" },
+		{ NNG_HTTP_STATUS_LENGTH_REQUIRED, "Length Required" },
+		{ NNG_HTTP_STATUS_PRECONDITION_FAILED, "Precondition Failed" },
+		{ NNG_HTTP_STATUS_ENTITY_TOO_LONG, "Request Entity Too Long" },
+		{ NNG_HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE,
+		    "Unsupported Media Type" },
+		{ NNG_HTTP_STATUS_RANGE_NOT_SATISFIABLE,
+		    "Requested Range Not Satisfiable" },
+		{ NNG_HTTP_STATUS_EXPECTATION_FAILED, "Expectation Failed" },
+		{ NNG_HTTP_STATUS_TEAPOT, "I Am A Teapot" },
+		{ NNG_HTTP_STATUS_LOCKED, "Locked" },
+		{ NNG_HTTP_STATUS_FAILED_DEPENDENCY, "Failed Dependency" },
+		{ NNG_HTTP_STATUS_UPGRADE_REQUIRED, "Upgrade Required" },
+		{ NNG_HTTP_STATUS_PRECONDITION_REQUIRED,
+		    "Precondition Required" },
+		{ NNG_HTTP_STATUS_TOO_MANY_REQUESTS, "Too Many Requests" },
+		{ NNG_HTTP_STATUS_HEADERS_TOO_LARGE, "Headers Too Large" },
+		{ NNG_HTTP_STATUS_UNAVAIL_LEGAL_REASONS,
+		    "Unavailable For Legal Reasons" },
+
+		// 500 series -- server errors
+		{ NNG_HTTP_STATUS_INTERNAL_SERVER_ERROR,
+		    "Internal Server Error" },
+		{ NNG_HTTP_STATUS_NOT_IMPLEMENTED, "Not Implemented" },
+		{ NNG_HTTP_STATUS_BAD_REQUEST, "Bad Gateway" },
+		{ NNG_HTTP_STATUS_SERVICE_UNAVAILABLE, "Service Unavailable" },
+		{ NNG_HTTP_STATUS_GATEWAY_TIMEOUT, "Gateway Timeout" },
+		{ NNG_HTTP_STATUS_HTTP_VERSION_NOT_SUPP,
+		    "HTTP Version Not Supported" },
+		{ NNG_HTTP_STATUS_VARIANT_ALSO_NEGOTIATES,
+		    "Variant Also Negotiates" },
+		{ NNG_HTTP_STATUS_INSUFFICIENT_STORAGE,
+		    "Insufficient Storage" },
+		{ NNG_HTTP_STATUS_LOOP_DETECTED, "Loop Detected" },
+		{ NNG_HTTP_STATUS_NOT_EXTENDED, "Not Extended" },
+		{ NNG_HTTP_STATUS_NETWORK_AUTH_REQUIRED,
+		    "Network Authentication Required" },
+
+		// Terminator
+		{ 0, NULL },
+	};
+
+	for (int i = 0; http_status[i].code != 0; i++) {
+		if (http_status[i].code == code) {
+			return (http_status[i].mesg);
+		}
+	}
+	return ("Unknown HTTP Status");
+}
+
+const char *
+nni_http_conn_get_reason(nng_http *conn)
+{
+#ifdef NNG_SUPP_HTTP
+	return (conn->res.rsn ? conn->res.rsn : http_reason(conn->res.code));
+#else
+	return (NULL);
+#endif
+}
+
+int
+nni_http_conn_set_reason(nng_http *conn, const char *reason)
+{
+	char *dup;
+	if ((reason != NULL) &&
+	    (strcmp(reason, nni_http_reason(conn->res.code)) == 0)) {
+		reason = NULL;
+		return (0);
+	}
+	if ((dup = nni_strdup(reason)) == NULL) {
+		return (NNG_ENOMEM);
+	}
+	if (conn->res.rsn != NULL) {
+		nni_strfree(conn->res.rsn);
+	}
+	conn->res.rsn = dup;
+	return (0);
+}
+
 int
 nni_http_conn_getopt(
     nni_http_conn *conn, const char *name, void *buf, size_t *szp, nni_type t)
@@ -720,6 +874,7 @@ http_init(nni_http_conn **connp, nng_stream *data)
 	nni_http_req_init(&conn->req);
 	nni_http_res_init(&conn->res);
 	nni_http_conn_set_version(conn, NNG_HTTP_VERSION_1_1);
+	nni_http_conn_set_method(conn, NULL);
 
 	if ((conn->rd_buf = nni_alloc(HTTP_BUFSIZE)) == NULL) {
 		nni_http_conn_fini(conn);

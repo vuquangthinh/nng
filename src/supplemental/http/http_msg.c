@@ -64,7 +64,7 @@ nni_http_req_reset(nni_http_req *req)
 	nni_strfree(req->uri);
 	req->uri = NULL;
 	nni_free(req->buf, req->bufsz);
-	nni_http_req_set_method(req, NULL);
+	(void) snprintf(req->meth, sizeof(req->meth), "GET");
 	req->bufsz  = 0;
 	req->buf    = NULL;
 	req->parsed = false;
@@ -481,15 +481,16 @@ http_req_prepare(nni_http_req *req)
 }
 
 static int
-http_res_prepare(nni_http_res *res)
+http_res_prepare(nng_http *conn)
 {
-	int rv;
+	int           rv;
+	nng_http_res *res = nni_http_conn_res(conn);
+
 	if (res->code == 0) {
 		res->code = NNG_HTTP_STATUS_OK;
 	}
 	rv = http_asprintf(&res->buf, &res->bufsz, &res->hdrs, "%s %d %s\r\n",
-	    res->vers, nni_http_res_get_status(res),
-	    nni_http_res_get_reason(res));
+	    res->vers, res->code, nni_http_conn_get_reason(conn));
 	return (rv);
 }
 
@@ -533,11 +534,12 @@ nni_http_req_get_buf(nni_http_req *req, void **data, size_t *szp)
 }
 
 int
-nni_http_res_get_buf(nni_http_res *res, void **data, size_t *szp)
+nni_http_res_get_buf(nni_http_conn *conn, void **data, size_t *szp)
 {
-	int rv;
+	int           rv;
+	nni_http_res *res = nni_http_conn_res(conn);
 
-	if ((res->buf == NULL) && (rv = http_res_prepare(res)) != 0) {
+	if ((res->buf == NULL) && (rv = http_res_prepare(conn)) != 0) {
 		return (rv);
 	}
 	*data = res->buf;
@@ -555,7 +557,7 @@ nni_http_req_init(nni_http_req *req)
 	req->data.size = 0;
 	req->data.own  = false;
 	req->uri       = NULL;
-	nni_http_req_set_method(req, "GET");
+	(void) snprintf(req->meth, sizeof(req->meth), "GET");
 }
 
 int
@@ -610,44 +612,15 @@ nni_http_res_init(nni_http_res *res)
 }
 
 const char *
-nni_http_req_get_method(const nni_http_req *req)
-{
-	return (req->meth);
-}
-
-const char *
 nni_http_req_get_uri(const nni_http_req *req)
 {
 	return (req->uri != NULL ? req->uri : "");
-}
-
-const char *
-nni_http_req_get_version(const nni_http_req *req)
-{
-	return (req->vers);
-}
-
-const char *
-nni_http_res_get_version(const nni_http_res *res)
-{
-	return (res->vers);
 }
 
 int
 nni_http_req_set_uri(nni_http_req *req, const char *uri)
 {
 	return (http_set_string(&req->uri, uri));
-}
-
-void
-nni_http_req_set_method(nni_http_req *req, const char *meth)
-{
-	if (meth == NULL) {
-		meth = "GET";
-	}
-	// this may truncate the method, but nobody should be sending
-	// methods so long.
-	(void) snprintf(req->meth, sizeof(req->meth), "%s", meth);
 }
 
 void
@@ -716,7 +689,7 @@ http_req_parse_line(nng_http *conn, nni_http_req *req, void *line)
 	*version = '\0';
 	version++;
 
-	nni_http_req_set_method(req, method);
+	nni_http_conn_set_method(conn, method);
 	if (((rv = nni_http_req_set_uri(req, uri)) != 0) ||
 	    ((rv = nni_http_conn_set_version(conn, version)) != 0)) {
 		return (rv);
@@ -753,10 +726,10 @@ http_res_parse_line(nng_http *conn, uint8_t *line)
 		return (NNG_EPROTO);
 	}
 
-	nni_http_res_set_status(res, (uint16_t) status);
+	nni_http_conn_set_status(conn, (uint16_t) status);
 
 	if (((rv = nni_http_conn_set_version(conn, version)) != 0) ||
-	    ((rv = nni_http_res_set_reason(res, reason)) != 0)) {
+	    ((rv = nni_http_conn_set_reason(conn, reason)) != 0)) {
 		return (rv);
 	}
 	res->parsed = true;
@@ -939,16 +912,6 @@ const char *
 nni_http_res_get_reason(const nni_http_res *res)
 {
 	return (res->rsn ? res->rsn : nni_http_reason(res->code));
-}
-
-int
-nni_http_res_set_reason(nni_http_res *res, const char *reason)
-{
-	if ((reason != NULL) &&
-	    (strcmp(reason, nni_http_reason(res->code)) == 0)) {
-		reason = NULL;
-	}
-	return (http_set_string(&res->rsn, reason));
 }
 
 int

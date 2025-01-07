@@ -192,17 +192,6 @@ nng_http_res_get_data(nng_http_res *res, void **datap, size_t *lenp)
 }
 
 const char *
-nng_http_req_get_method(const nng_http_req *req)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_req_get_method(req));
-#else
-	NNI_ARG_UNUSED(req);
-	return (NULL);
-#endif
-}
-
-const char *
 nng_http_req_get_uri(const nng_http_req *req)
 {
 #ifdef NNG_SUPP_HTTP
@@ -210,17 +199,6 @@ nng_http_req_get_uri(const nng_http_req *req)
 #else
 	NNI_ARG_UNUSED(req);
 	return (NULL);
-#endif
-}
-
-void
-nng_http_req_set_method(nng_http_req *req, const char *meth)
-{
-#ifdef NNG_SUPP_HTTP
-	nni_http_req_set_method(req, meth);
-#else
-	NNI_ARG_UNUSED(req);
-	NNI_ARG_UNUSED(meth);
 #endif
 }
 
@@ -248,17 +226,6 @@ nng_http_req_set_uri(nng_http_req *req, const char *uri)
 #endif
 }
 
-uint16_t
-nng_http_res_get_status(const nng_http_res *res)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_res_get_status(res));
-#else
-	NNI_ARG_UNUSED(res);
-	return (0);
-#endif
-}
-
 const char *
 nng_http_get_version(nng_http *conn)
 {
@@ -267,40 +234,6 @@ nng_http_get_version(nng_http *conn)
 #else
 	NNI_ARG_UNUSED(res);
 	return (NULL);
-#endif
-}
-
-const char *
-nng_http_res_get_reason(const nng_http_res *res)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_res_get_reason(res));
-#else
-	NNI_ARG_UNUSED(res);
-	return (NULL);
-#endif
-}
-
-void
-nng_http_res_set_status(nng_http_res *res, uint16_t status)
-{
-#ifdef NNG_SUPP_HTTP
-	nni_http_res_set_status(res, status);
-#else
-	NNI_ARG_UNUSED(res);
-	NNI_ARG_UNUSED(status);
-#endif
-}
-
-int
-nng_http_res_set_reason(nng_http_res *res, const char *rsn)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_res_set_reason(res, rsn));
-#else
-	NNI_ARG_UNUSED(res);
-	NNI_ARG_UNUSED(rsn);
-	return (NNG_ENOTSUP);
 #endif
 }
 
@@ -325,10 +258,10 @@ nng_http_conn_res(nng_http_conn *conn)
 }
 
 void
-nng_http_set_status(nng_http_conn *conn, uint16_t status)
+nng_http_set_status(nng_http *conn, uint16_t status)
 {
 #ifdef NNG_SUPP_HTTP
-	nni_http_res_set_status(nni_http_conn_res(conn), status);
+	nni_http_conn_set_status(conn, status);
 #else
 	NNI_ARG_UNUSED(res);
 	NNI_ARG_UNUSED(status);
@@ -339,7 +272,7 @@ uint16_t
 nng_http_get_status(nng_http *conn)
 {
 #ifdef NNG_SUPP_HTTP
-	return (nni_http_res_get_status(nni_http_conn_res(conn)));
+	return (nni_http_conn_get_status(conn));
 #else
 	NNI_ARG_UNUSED(res);
 	NNI_ARG_UNUSED(status);
@@ -351,7 +284,7 @@ const char *
 nng_http_get_reason(nng_http *conn)
 {
 #ifdef NNG_SUPP_HTTP
-	return (nni_http_res_get_reason(nni_http_conn_res(conn)));
+	return (nni_http_conn_get_reason(conn));
 #else
 	NNI_ARG_UNUSED(res);
 	NNI_ARG_UNUSED(status);
@@ -363,7 +296,7 @@ int
 nng_http_set_reason(nng_http *conn, const char *reason)
 {
 #ifdef NNG_SUPP_HTTP
-	return (nni_http_res_set_reason(nni_http_conn_res(conn), reason));
+	return (nni_http_conn_set_reason(conn, reason));
 #else
 	NNI_ARG_UNUSED(res);
 	NNI_ARG_UNUSED(reason);
@@ -378,6 +311,17 @@ nng_http_set_version(nng_http *conn, const char *version)
 	return (nni_http_conn_set_version(conn, version));
 #else
 	return (NNG_ENOTSUP);
+#endif
+}
+
+void
+nng_http_set_method(nng_http_conn *conn, const char *method)
+{
+#ifdef NNG_SUPP_HTTP
+	nni_http_conn_set_method(conn, method);
+#else
+	NNI_ARG_UNUSED(conn);
+	NNI_ARG_UNUSED(method);
 #endif
 }
 
@@ -777,10 +721,10 @@ nng_http_server_get_addr(nng_http_server *srv, nng_sockaddr *addr)
 }
 
 int
-nng_http_server_res_error(nng_http_server *srv, nng_http_res *res)
+nng_http_server_error(nng_http_server *srv, nng_http *conn)
 {
 #ifdef NNG_SUPP_HTTP
-	return (nni_http_server_res_error(srv, res));
+	return (nni_http_server_error(srv, conn));
 #else
 	NNI_ARG_UNUSED(srv);
 	NNI_ARG_UNUSED(res);

@@ -292,7 +292,7 @@ http_txn_cb(void *arg)
 			return;
 		}
 
-		str = nni_http_req_get_method(txn->req);
+		str = nni_http_conn_get_method(txn->conn);
 		if ((nni_strcasecmp(str, "HEAD") == 0) ||
 		    ((str = nni_http_res_get_header(
 		          txn->res, "Content-Length")) == NULL) ||

@@ -114,14 +114,14 @@ and connections.
 |xref:nng_http_req_free.3http.adoc[nng_http_req_free()]|free HTTP request structure
 |xref:nng_http_req_get_data.3http.adoc[nng_http_req_get_data()]|get HTTP request body
 |xref:nng_http_req_get_header.3http.adoc[nng_http_req_get_header()]|return HTTP request header
-|xref:nng_http_req_get_method.3http.adoc[nng_http_req_get_method()]|return HTTP request method
+|xref:nng_http_get_method.3http.adoc[nng_http_get_method()]|return HTTP request method
 |xref:nng_http_req_get_uri.3http.adoc[nng_http_req_get_uri()]|return HTTP request URI
 |xref:nng_http_req_get_version.3http.adoc[nng_http_req_get_version()]|return HTTP request protocol version
 |xref:nng_http_req_set_data.3http.adoc[nng_http_req_set_data()]|set HTTP request body
 |xref:nng_http_req_set_header.3http.adoc[nng_http_req_set_header()]|set HTTP request header
-|xref:nng_http_req_set_method.3http.adoc[nng_http_req_set_method()]|set HTTP request method
+|xref:nng_http_set_method.3http.adoc[nng_http_set_method()]|set HTTP method
 |xref:nng_http_req_set_uri.3http.adoc[nng_http_req_set_uri()]|set HTTP request URI
-|xref:nng_http_req_set_version.3http.adoc[nng_http_req_set_version()]|set HTTP request protocol version
+|xref:nng_http_set_version.3http.adoc[nng_http_set_version()]|set HTTP protocol version
 |xref:nng_http_res_add_header.3http.adoc[nng_http_res_add_header()]|add HTTP response header
 |xref:nng_http_res_copy_data.3http.adoc[nng_http_res_copy_data()]|copy HTTP response body
 |xref:nng_http_res_del_header.3http.adoc[nng_http_res_del_header()]|delete HTTP response header

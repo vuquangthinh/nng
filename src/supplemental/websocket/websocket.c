@@ -1332,7 +1332,7 @@ ws_http_cb_dialer(nni_ws *ws, nni_aio *aio)
 		return;
 	}
 
-	status = nni_http_res_get_status(ws->res);
+	status = nni_http_conn_get_status(ws->http);
 	switch (status) {
 	case NNG_HTTP_STATUS_SWITCHING:
 		break;
@@ -1532,7 +1532,7 @@ ws_handler(nng_http_conn *conn, void *arg, nng_aio *aio)
 		goto err;
 	}
 
-	if (strcmp(nni_http_req_get_method(req), "GET") != 0) {
+	if (strcmp(nni_http_conn_get_method(conn), "GET") != 0) {
 		// HEAD request.  We can't really deal with it.
 		status = NNG_HTTP_STATUS_BAD_REQUEST;
 		goto err;
@@ -1581,7 +1581,7 @@ ws_handler(nng_http_conn *conn, void *arg, nng_aio *aio)
 		goto err;
 	}
 
-	nni_http_res_set_status(res, NNG_HTTP_STATUS_SWITCHING);
+	nni_http_conn_set_status(conn, NNG_HTTP_STATUS_SWITCHING);
 
 	if ((SETH("Connection", "Upgrade") != 0) ||
 	    (SETH("Upgrade", "websocket") != 0) ||
@@ -1615,7 +1615,7 @@ ws_handler(nng_http_conn *conn, void *arg, nng_aio *aio)
 			return;
 		}
 
-		if (nni_http_res_get_status(res) !=
+		if (nni_http_conn_get_status(conn) !=
 		    NNG_HTTP_STATUS_SWITCHING) {
 			// The hook has decided to give back a
 			// different reply and we are not upgrading

@@ -417,8 +417,8 @@ http_sconn_error(http_sconn *sc, uint16_t err)
 	nni_http_res *res;
 
 	res = nng_http_conn_res(sc->conn);
-	nng_http_res_set_status(res, err);
-	if (nni_http_server_res_error(sc->server, res) != 0) {
+	nng_http_set_status(sc->conn, err);
+	if (nni_http_server_error(sc->server, sc->conn) != 0) {
 		http_sconn_close(sc);
 		return;
 	}
@@ -616,7 +616,7 @@ http_sconn_rxdone(void *arg)
 			break;
 		}
 		// So, what about the method?
-		val = nni_http_req_get_method(req);
+		val = nni_http_conn_get_method(sc->conn);
 		if (strcmp(val, h->method) == 0) {
 			break;
 		}
@@ -734,9 +734,7 @@ http_sconn_cbdone(void *arg)
 		if (sc->close) {
 			nni_http_res_set_header(res, "Connection", "close");
 		}
-		if (strcmp(
-		        nni_http_req_get_method(nng_http_conn_req(sc->conn)),
-		        "HEAD") == 0) {
+		if (strcmp(nni_http_conn_get_method(sc->conn), "HEAD") == 0) {
 			void  *data;
 			size_t size;
 			// prune off the data, but preserve the content-length
@@ -746,7 +744,7 @@ http_sconn_cbdone(void *arg)
 			nni_http_res_get_data(res, &data, &size);
 			nni_http_res_set_data(res, NULL, size);
 		} else if (nni_http_res_is_error(res)) {
-			(void) nni_http_server_res_error(s, res);
+			(void) nni_http_server_error(s, sc->conn);
 		}
 		nni_http_write_res(sc->conn, &sc->txaio);
 	} else if (sc->close) {
@@ -1090,14 +1088,15 @@ nni_http_server_set_error_file(
 }
 
 int
-nni_http_server_res_error(nni_http_server *s, nni_http_res *res)
+nni_http_server_error(nni_http_server *s, nng_http *conn)
 {
-	http_error *epage;
-	char       *body = NULL;
-	char       *html = NULL;
-	size_t      len  = 0;
-	uint16_t    code = nni_http_res_get_status(res);
-	int         rv;
+	http_error   *epage;
+	char         *body = NULL;
+	char         *html = NULL;
+	size_t        len  = 0;
+	nng_http_res *res  = nni_http_conn_res(conn);
+	uint16_t      code = nni_http_conn_get_status(conn);
+	int           rv;
 
 	nni_mtx_lock(&s->errors_mtx);
 	NNI_LIST_FOREACH (&s->errors, epage) {
@@ -1122,7 +1121,7 @@ nni_http_server_res_error(nni_http_server *s, nni_http_res *res)
 	if (((rv = nni_http_res_copy_data(res, body, len)) == 0) &&
 	    ((rv = nni_http_res_set_header(
 	          res, "Content-Type", "text/html; charset=UTF-8")) == 0)) {
-		nni_http_res_set_status(res, code);
+		nni_http_conn_set_status(conn, code);
 	}
 	nni_strfree(html);
 
@@ -1322,7 +1321,7 @@ typedef struct http_file {
 } http_file;
 
 static void
-http_handle_file(nni_http_conn *conn, void *arg, nni_aio *aio)
+http_handle_file(nng_http *conn, void *arg, nni_aio *aio)
 {
 	nni_http_res *res = nng_http_conn_res(conn);
 	void         *data;
@@ -1372,7 +1371,7 @@ http_handle_file(nni_http_conn *conn, void *arg, nni_aio *aio)
 		return;
 	}
 
-	nni_http_res_set_status(res, NNG_HTTP_STATUS_OK);
+	nng_http_set_status(conn, NNG_HTTP_STATUS_OK);
 
 	nni_free(data, size);
 	nni_aio_set_output(aio, 0, res);
@@ -1439,7 +1438,7 @@ nni_http_handler_init_file(
 }
 
 static void
-http_handle_dir(nng_http_conn *conn, void *arg, nng_aio *aio)
+http_handle_dir(nng_http *conn, void *arg, nng_aio *aio)
 {
 	nni_http_req *req = nni_http_conn_req(conn);
 	nni_http_res *res = nni_http_conn_res(conn);
@@ -1561,7 +1560,7 @@ http_handle_dir(nng_http_conn *conn, void *arg, nng_aio *aio)
 		return;
 	}
 
-	nni_http_res_set_status(res, NNG_HTTP_STATUS_OK);
+	nng_http_set_status(conn, NNG_HTTP_STATUS_OK);
 
 	nni_free(data, size);
 	nni_aio_set_output(aio, 0, res);
@@ -1605,7 +1604,7 @@ typedef struct http_redirect {
 } http_redirect;
 
 static void
-http_handle_redirect(nng_http_conn *conn, void *data, nng_aio *aio)
+http_handle_redirect(nng_http *conn, void *data, nng_aio *aio)
 {
 	nni_http_res  *res  = nng_http_conn_res(conn);
 	nni_http_req  *req  = nng_http_conn_req(conn);
@@ -1657,7 +1656,7 @@ http_handle_redirect(nng_http_conn *conn, void *data, nng_aio *aio)
 		return;
 	}
 
-	nni_http_res_set_status(res, hr->code);
+	nni_http_conn_set_status(conn, hr->code);
 
 	if (loc != hr->where) {
 		nni_strfree(loc);
@@ -1725,7 +1724,7 @@ typedef struct http_static {
 } http_static;
 
 static void
-http_handle_static(nng_http_conn *conn, void *data, nni_aio *aio)
+http_handle_static(nng_http *conn, void *data, nni_aio *aio)
 {
 	http_static  *hs = data;
 	const char   *ctype;
@@ -1744,7 +1743,7 @@ http_handle_static(nng_http_conn *conn, void *data, nni_aio *aio)
 		return;
 	}
 
-	nni_http_res_set_status(r, NNG_HTTP_STATUS_OK);
+	nng_http_set_status(conn, NNG_HTTP_STATUS_OK);
 
 	nni_aio_set_output(aio, 0, r);
 	nni_aio_finish(aio, 0, 0);

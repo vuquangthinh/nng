@@ -1,6 +1,6 @@
-= nng_http_res_set_status(3http)
+= nng_http_set_status(3http)
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2025 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This document is supplied under the terms of the MIT License, a
@@ -11,7 +11,7 @@
 
 == NAME
 
-nng_http_res_set_status - set HTTP response status
+nng_http_set_status - set HTTP status
 
 == SYNOPSIS
 
@@ -20,13 +20,13 @@ nng_http_res_set_status - set HTTP response status
 #include <nng/nng.h>
 #include <nng/supplemental/http/http.h>
 
-void nng_http_res_set_status(nng_http_res *res, uint16_t status);
+void nng_http_set_status(nng_http *conn, uint16_t status);
 ----
 
 == DESCRIPTION
 
-The `nng_http_res_set_status()` sets the numeric HTTP status code
-associated with the response _res_ to _status_.
+The `nng_http_set_status()` sets the numeric HTTP status code
+associated with the response for _conn_ to _status_.
 The default value for a newly allocated response is 200 (`NNG_HTTP_STATUS_OK`).
 
 The _status_ is not verified, so the caller should take care to ensure
@@ -103,12 +103,11 @@ Please see the relevant HTTP RFCs for the semantics and correct
 use of these status codes.
 
 TIP: It is a good idea to also set the reason message with
-xref:nng_http_res_set_reason.3http.adoc[`nng_http_set_reason()`].
+xref:nng_http_set_reason.3http.adoc[`nng_http_set_reason()`].
 This will help any humans who may have to diagnose a failure.
 
 == SEE ALSO
 
 [.text-left]
-xref:nng_http_res_get_status.3http.adoc[nng_http_req_get_status(3http)],
-xref:nng_http_res_set_reason.3http.adoc[nng_http_req_set_reason(3http)],
-xref:nng.7.adoc[nng(7)]
+xref:nng_http_get_status.3http.adoc[nng_http_req_status(3http)],
+xref:nng_http_set_reason.3http.adoc[nng_http_req_reason(3http)]

@@ -1,6 +1,6 @@
-= nng_http_req_get_method(3http)
+= nng_http_get_method(3http)
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2025 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This document is supplied under the terms of the MIT License, a
@@ -11,7 +11,7 @@
 
 == NAME
 
-nng_http_req_get_method - return HTTP request method
+nng_http_get_method - return HTTP request method
 
 == SYNOPSIS
 
@@ -20,13 +20,13 @@ nng_http_req_get_method - return HTTP request method
 #include <nng/nng.h>
 #include <nng/supplemental/http/http.h>
 
-const char *nng_http_req_get_method(const nng_http_req *req);
+const char *nng_http_get_method(const nng_http_req *req);
 ----
 
 == DESCRIPTION
 
-The `nng_http_req_get_method()` returns the HTTP method associated with
-the request _req_.
+The `nng_http_get_method()` returns the HTTP method associated with
+the connection _conn_.
 The value will be a string, such as "GET" or "POST".
 
 
@@ -34,12 +34,7 @@ The value will be a string, such as "GET" or "POST".
 
 Request method as a string.
 
-== ERRORS
-
-None.
-
 == SEE ALSO
 
 [.text-left]
-xref:nng_http_req_set_method.3http.adoc[nng_http_req_set_method(3http)],
-xref:nng.7.adoc[nng(7)]
+xref:nng_http_set_method.3http.adoc[nng_http_set_method(3http)]
