@@ -1737,7 +1737,7 @@ http_handle_static(nng_http_conn *conn, void *data, nni_aio *aio)
 	}
 
 	r = nng_http_conn_res(conn);
-	nng_http_res_reset(r);
+	nni_http_res_reset(r);
 	if (((rv = nni_http_res_set_header(r, "Content-Type", ctype)) != 0) ||
 	    ((rv = nni_http_res_set_data(r, hs->data, hs->size)) != 0)) {
 		nni_aio_finish_error(aio, rv);

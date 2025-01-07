@@ -196,8 +196,7 @@ http_rd_buf(nni_http_conn *conn, nni_aio *aio)
 		return (NNG_EAGAIN);
 
 	case HTTP_RD_REQ:
-		rv = nni_http_req_parse(
-		    nni_aio_get_prov_data(aio), rbuf, cnt, &n);
+		rv = nni_http_req_parse(&conn->req, rbuf, cnt, &n);
 		conn->rd_get += n;
 		if (conn->rd_get == conn->rd_put) {
 			conn->rd_get = conn->rd_put = 0;
@@ -213,8 +212,7 @@ http_rd_buf(nni_http_conn *conn, nni_aio *aio)
 		return (rv);
 
 	case HTTP_RD_RES:
-		rv = nni_http_res_parse(
-		    nni_aio_get_prov_data(aio), rbuf, cnt, &n);
+		rv = nni_http_res_parse(&conn->res, rbuf, cnt, &n);
 		conn->rd_get += n;
 		if (conn->rd_get == conn->rd_put) {
 			conn->rd_get = conn->rd_put = 0;
@@ -513,8 +511,6 @@ http_wr_submit(nni_http_conn *conn, nni_aio *aio, enum write_flavor flavor)
 void
 nni_http_read_req(nni_http_conn *conn, nni_aio *aio)
 {
-	nni_aio_set_prov_data(aio, &conn->req);
-
 	// clear the sent flag (used for the server)
 	conn->res_sent = false;
 	nni_http_req_reset(&conn->req);
@@ -526,8 +522,6 @@ nni_http_read_req(nni_http_conn *conn, nni_aio *aio)
 void
 nni_http_read_res(nni_http_conn *conn, nni_aio *aio)
 {
-	nni_aio_set_prov_data(aio, &conn->res);
-
 	nni_mtx_lock(&conn->mtx);
 	http_rd_submit(conn, aio, HTTP_RD_RES);
 	nni_mtx_unlock(&conn->mtx);

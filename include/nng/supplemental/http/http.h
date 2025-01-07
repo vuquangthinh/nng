@@ -291,8 +291,9 @@ NNG_DECL void nng_http_conn_read_res(nng_http_conn *, nng_aio *);
 // nng_http_req_reset resets the request to an initially allocated state.
 NNG_DECL void nng_http_req_reset(nng_http_req *);
 
-// nng_http_res_reset resets the response to an initially allocated state.
-NNG_DECL void nng_http_res_reset(nng_http_res *);
+// nng_http_conn_reset resets the transaction (including headers, URI, etc.)
+// and the response.  It should be used when reusing the connection.
+NNG_DECL void nng_http_conn_reset(nng_http_conn *);
 
 // nng_http_conn_get_status gets the status of the last transaction
 NNG_DECL uint16_t nng_http_conn_get_status(nng_http_conn *);

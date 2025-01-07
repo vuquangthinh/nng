@@ -937,21 +937,22 @@ nng_http_conn_transact(nng_http_conn *conn, nng_aio *aio)
 }
 
 void
-nng_http_req_reset(nng_http_req *req)
+nng_http_conn_reset(nng_http_conn *conn)
 {
 #ifdef NNG_SUPP_HTTP
-	nni_http_req_reset(req);
+	nni_http_req_reset(nni_http_conn_req(conn));
+	nni_http_res_reset(nni_http_conn_res(conn));
 #else
 	NNI_ARG_UNUSED(req);
 #endif
 }
 
 void
-nng_http_res_reset(nng_http_res *res)
+nng_http_req_reset(nng_http_req *req)
 {
 #ifdef NNG_SUPP_HTTP
-	nni_http_res_reset(res);
+	nni_http_req_reset(req);
 #else
-	NNI_ARG_UNUSED(res);
+	NNI_ARG_UNUSED(req);
 #endif
 }

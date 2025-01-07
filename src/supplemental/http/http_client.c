@@ -392,7 +392,8 @@ nni_http_transact_conn(nni_http_conn *conn, nni_aio *aio)
 	txn->req    = nni_http_conn_req(conn);
 	txn->res    = nni_http_conn_res(conn);
 	txn->state  = HTTP_SENDING;
-	nng_http_res_reset(txn->res);
+
+	nni_http_res_reset(txn->res);
 
 	nni_mtx_lock(&http_txn_lk);
 	if (!nni_aio_start(aio, http_txn_cancel, txn)) {

@@ -163,6 +163,8 @@ TestMain("HTTP Client", {
 			So(nng_http_res_get_status(res) == 200);
 			nng_http_res_get_data(res, &data, &len);
 
+			nng_http_conn_reset(conn);
+			So(nng_http_req_set_url(req, url) == 0);
 			nng_http_conn_transact(conn, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
