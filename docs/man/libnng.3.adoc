@@ -118,7 +118,6 @@ and connections.
 |xref:nng_http_req_get_method.3http.adoc[nng_http_req_get_method()]|return HTTP request method
 |xref:nng_http_req_get_uri.3http.adoc[nng_http_req_get_uri()]|return HTTP request URI
 |xref:nng_http_req_get_version.3http.adoc[nng_http_req_get_version()]|return HTTP request protocol version
-|xref:nng_http_req_reset.3http.adoc[nng_http_req_reset()]|reset HTTP request structure
 |xref:nng_http_req_set_data.3http.adoc[nng_http_req_set_data()]|set HTTP request body
 |xref:nng_http_req_set_header.3http.adoc[nng_http_req_set_header()]|set HTTP request header
 |xref:nng_http_req_set_method.3http.adoc[nng_http_req_set_method()]|set HTTP request method

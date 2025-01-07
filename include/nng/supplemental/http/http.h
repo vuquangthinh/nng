@@ -288,9 +288,6 @@ NNG_DECL void nng_http_conn_read_req(nng_http_conn *, nng_aio *);
 // and reading any submitted entity data itself.
 NNG_DECL void nng_http_conn_read_res(nng_http_conn *, nng_aio *);
 
-// nng_http_req_reset resets the request to an initially allocated state.
-NNG_DECL void nng_http_req_reset(nng_http_req *);
-
 // nng_http_conn_reset resets the transaction (including headers, URI, etc.)
 // and the response.  It should be used when reusing the connection.
 NNG_DECL void nng_http_conn_reset(nng_http_conn *);

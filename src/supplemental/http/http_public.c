@@ -946,13 +946,3 @@ nng_http_conn_reset(nng_http_conn *conn)
 	NNI_ARG_UNUSED(req);
 #endif
 }
-
-void
-nng_http_req_reset(nng_http_req *req)
-{
-#ifdef NNG_SUPP_HTTP
-	nni_http_req_reset(req);
-#else
-	NNI_ARG_UNUSED(req);
-#endif
-}
