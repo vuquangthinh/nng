@@ -109,7 +109,6 @@ and connections.
 |xref:nng_http_conn_write_req.3http.adoc[nng_http_conn_write_req()]|write HTTP request
 |xref:nng_http_conn_write_res.3http.adoc[nng_http_conn_write_res()]|write HTTP response
 |xref:nng_http_req_add_header.3http.adoc[nng_http_req_add_header()]|add HTTP request header
-|xref:nng_http_req_alloc.3http.adoc[nng_http_req_alloc()]|allocate HTTP request structure
 |xref:nng_http_req_copy_data.3http.adoc[nng_http_req_copy_data()]|copy HTTP request body
 |xref:nng_http_req_del_header.3http.adoc[nng_http_req_del_header()]|delete HTTP request header
 |xref:nng_http_req_free.3http.adoc[nng_http_req_free()]|free HTTP request structure

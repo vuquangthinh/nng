@@ -558,7 +558,7 @@ nni_http_read(nni_http_conn *conn, nni_aio *aio)
 }
 
 void
-nni_http_write_req(nni_http_conn *conn, nni_http_req *req, nni_aio *aio)
+nni_http_write_req(nni_http_conn *conn, nni_aio *aio)
 {
 	int     rv;
 	void   *buf;
@@ -568,11 +568,11 @@ nni_http_write_req(nni_http_conn *conn, nni_http_req *req, nni_aio *aio)
 	nni_iov iov[2];
 	int     niov;
 
-	if ((rv = nni_http_req_get_buf(req, &buf, &bufsz)) != 0) {
+	if ((rv = nni_http_req_get_buf(&conn->req, &buf, &bufsz)) != 0) {
 		nni_aio_finish_error(aio, rv);
 		return;
 	}
-	nni_http_req_get_data(req, &data, &size);
+	nni_http_req_get_data(&conn->req, &data, &size);
 	niov           = 1;
 	iov[0].iov_len = bufsz;
 	iov[0].iov_buf = buf;

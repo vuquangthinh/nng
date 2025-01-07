@@ -54,7 +54,7 @@ TestMain("HTTP Client", {
 
 			req = nng_http_conn_req(http);
 			So(nng_http_req_set_url(req, url) == 0);
-			nng_http_conn_write_req(http, req, aio);
+			nng_http_conn_write_req(http, aio);
 			res = nng_http_conn_res(http);
 
 			nng_aio_wait(aio);

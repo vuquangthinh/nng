@@ -190,7 +190,6 @@ nni_http_client_connect(nni_http_client *c, nni_aio *aio)
 }
 
 typedef enum http_txn_state {
-	HTTP_CONNECTING,
 	HTTP_SENDING,
 	HTTP_RECVING,
 	HTTP_RECVING_BODY,
@@ -269,13 +268,6 @@ http_txn_cb(void *arg)
 		return;
 	}
 	switch (txn->state) {
-	case HTTP_CONNECTING:
-		txn->conn  = nni_aio_get_output(&txn->aio, 0);
-		txn->state = HTTP_SENDING;
-		nni_http_write_req(txn->conn, txn->req, &txn->aio);
-		nni_mtx_unlock(&http_txn_lk);
-		return;
-
 	case HTTP_SENDING:
 		txn->state = HTTP_RECVING;
 		nni_http_read_res(txn->conn, &txn->aio);
@@ -402,6 +394,6 @@ nni_http_transact_conn(nni_http_conn *conn, nni_aio *aio)
 		return;
 	}
 	nni_list_append(&txn->aios, aio);
-	nni_http_write_req(conn, txn->req, &txn->aio);
+	nni_http_write_req(conn, &txn->aio);
 	nni_mtx_unlock(&http_txn_lk);
 }

@@ -15,28 +15,6 @@
 // Symbols in this file are "public" versions of the HTTP API.
 // These are suitable for exposure to applications.
 
-int
-nng_http_req_alloc(nng_http_req **reqp, const nng_url *url)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_req_alloc(reqp, url));
-#else
-	NNI_ARG_UNUSED(reqp);
-	NNI_ARG_UNUSED(url);
-	return (NNG_ENOTSUP);
-#endif
-}
-
-void
-nng_http_req_free(nng_http_req *req)
-{
-#ifdef NNG_SUPP_HTTP
-	nni_http_req_free(req);
-#else
-	NNI_ARG_UNUSED(req);
-#endif
-}
-
 const char *
 nng_http_req_get_header(const nng_http_req *req, const char *key)
 {
@@ -460,13 +438,12 @@ nng_http_conn_write_all(nng_http_conn *conn, nng_aio *aio)
 }
 
 void
-nng_http_conn_write_req(nng_http_conn *conn, nng_http_req *req, nng_aio *aio)
+nng_http_conn_write_req(nng_http_conn *conn, nng_aio *aio)
 {
 #ifdef NNG_SUPP_HTTP
-	nni_http_write_req(conn, req, aio);
+	nni_http_write_req(conn, aio);
 #else
 	NNI_ARG_UNUSED(conn);
-	NNI_ARG_UNUSED(req);
 	nni_aio_finish_error(aio, NNG_ENOTSUP);
 #endif
 }

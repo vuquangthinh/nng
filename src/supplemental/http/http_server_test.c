@@ -42,7 +42,7 @@ httpdo(struct server_test *st, void **datap, size_t *sizep)
 	const char   *ptr;
 	nng_http_res *res;
 
-	nng_http_conn_write_req(st->conn, st->req, st->aio);
+	nng_http_conn_write_req(st->conn, st->aio);
 	nng_aio_wait(st->aio);
 	if ((rv = nng_aio_result(st->aio)) != 0) {
 		return (rv);
@@ -220,7 +220,7 @@ test_server_basic(void)
 	server_setup(&st, h);
 
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/home.html"));
-	nng_http_conn_write_req(st.conn, st.req, st.aio);
+	nng_http_conn_write_req(st.conn, st.aio);
 
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));
@@ -257,7 +257,7 @@ test_server_404(void)
 	server_setup(&st, NULL);
 
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/bogus"));
-	nng_http_conn_write_req(st.conn, st.req, st.aio);
+	nng_http_conn_write_req(st.conn, st.aio);
 
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));
@@ -281,7 +281,7 @@ test_server_bad_version(void)
 
 	NUTS_PASS(nng_http_set_version(st.conn, "HTTP/0.9"));
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/bogus"));
-	nng_http_conn_write_req(st.conn, st.req, st.aio);
+	nng_http_conn_write_req(st.conn, st.aio);
 
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));
@@ -303,7 +303,7 @@ test_server_missing_host(void)
 
 	nng_http_req_del_header(st.req, "Host");
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/bogus"));
-	nng_http_conn_write_req(st.conn, st.req, st.aio);
+	nng_http_conn_write_req(st.conn, st.aio);
 
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));
@@ -345,7 +345,7 @@ test_server_wrong_method(void)
 
 	nng_http_req_set_method(st.req, "POST");
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/home.html"));
-	nng_http_conn_write_req(st.conn, st.req, st.aio);
+	nng_http_conn_write_req(st.conn, st.aio);
 
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));

@@ -40,6 +40,5 @@ A local copy of the _method_ is made in the request _req_.
 == SEE ALSO
 
 [.text-left]
-xref:nng_http_req_alloc.3http.adoc[nng_http_req_alloc(3http)],
 xref:nng_http_req_get_method.3http.adoc[nng_http_req_get_method(3http)],
 xref:nng.7.adoc[nng(7)]

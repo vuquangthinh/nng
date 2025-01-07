@@ -2220,7 +2220,7 @@ ws_conn_cb(void *arg)
 
 	ws->req = req;
 
-	nni_http_write_req(ws->http, req, &ws->httpaio);
+	nni_http_write_req(ws->http, &ws->httpaio);
 	nni_mtx_unlock(&ws->mtx);
 	return;
 

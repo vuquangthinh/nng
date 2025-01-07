@@ -95,16 +95,6 @@ enum nng_http_status {
 // nng_http_req represents an HTTP request.
 typedef struct nng_http_req nng_http_req;
 
-// nng_http_req_alloc creates a vanilla HTTP request object.  The object is
-// initialized with the given URL object for an HTTP/1.1 GET request by
-// default. It also adds the Host: header required for HTTP/1.1.  If the
-// url is NULL, then the uri and Host: header are uninitialized, and will
-// need to be set explicitly.
-NNG_DECL int nng_http_req_alloc(nng_http_req **, const nng_url *);
-
-// nng_http_req_free frees an HTTP request object.
-NNG_DECL void nng_http_req_free(nng_http_req *);
-
 // nng_http_req_get_method returns the method.
 NNG_DECL const char *nng_http_req_get_method(const nng_http_req *);
 
@@ -244,8 +234,7 @@ NNG_DECL void nng_http_conn_write_all(nng_http_conn *, nng_aio *);
 
 // nng_http_conn_write_req writes the entire request.  It will also write any
 // data that has been attached.
-NNG_DECL void nng_http_conn_write_req(
-    nng_http_conn *, nng_http_req *, nng_aio *);
+NNG_DECL void nng_http_conn_write_req(nng_http_conn *, nng_aio *);
 
 // nng_http_conn_write_res writes the entire response.  It will also write any
 // data that has been attached.  It uses the res object in the conn.

@@ -36,6 +36,5 @@ Request version as a string.
 == SEE ALSO
 
 [.text-left]
-xref:nng_http_req_alloc.3http.adoc[nng_http_req_alloc(3http)],
 xref:nng_http_req_set_version.3http.adoc[nng_http_req_set_version(3http)],
 xref:nng.7.adoc[nng(7)]

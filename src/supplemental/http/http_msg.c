@@ -86,24 +86,6 @@ nni_http_res_reset(nni_http_res *res)
 	res->bufsz = 0;
 }
 
-void
-nni_http_req_free(nni_http_req *req)
-{
-	if (req != NULL) {
-		nni_http_req_reset(req);
-		NNI_FREE_STRUCT(req);
-	}
-}
-
-void
-nni_http_res_free(nni_http_res *res)
-{
-	if (res != NULL) {
-		nni_http_res_reset(res);
-		NNI_FREE_STRUCT(res);
-	}
-}
-
 static int
 http_del_header(nni_list *hdrs, const char *key)
 {
@@ -612,25 +594,6 @@ nni_http_req_set_url(nni_http_req *req, const nng_url *url)
 	if ((rv = nni_http_req_set_header(req, "Host", host)) != 0) {
 		return (rv);
 	}
-	return (0);
-}
-
-int
-nni_http_req_alloc(nni_http_req **reqp, const nng_url *url)
-{
-	nni_http_req *req;
-	if ((req = NNI_ALLOC_STRUCT(req)) == NULL) {
-		return (NNG_ENOMEM);
-	}
-	nni_http_req_init(req);
-	if (url != NULL) {
-		int rv;
-		if ((rv = nni_http_req_set_url(req, url)) != 0) {
-			nni_http_req_free(req);
-			return (rv);
-		}
-	}
-	*reqp = req;
 	return (0);
 }
 
