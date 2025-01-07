@@ -37,14 +37,14 @@ extern const char *nni_http_reason(uint16_t);
 extern void  nni_http_req_init(nni_http_req *);
 extern void  nni_http_req_reset(nni_http_req *);
 extern int   nni_http_req_get_buf(nni_http_req *, void **, size_t *);
-extern int   nni_http_req_parse(nni_http_req *, void *, size_t, size_t *);
+extern int   nni_http_req_parse(nng_http *, void *, size_t, size_t *);
 extern char *nni_http_req_headers(nni_http_req *);
 extern void  nni_http_req_get_data(nni_http_req *, void **, size_t *);
 
 extern void  nni_http_res_init(nni_http_res *);
 extern void  nni_http_res_reset(nni_http_res *);
 extern int   nni_http_res_get_buf(nni_http_res *, void **, size_t *);
-extern int   nni_http_res_parse(nni_http_res *, void *, size_t, size_t *);
+extern int   nni_http_res_parse(nng_http *, void *, size_t, size_t *);
 extern void  nni_http_res_get_data(nni_http_res *, void **, size_t *);
 extern char *nni_http_res_headers(nni_http_res *);
 
@@ -135,16 +135,12 @@ extern int nni_http_res_set_data(nni_http_res *, const void *, size_t);
 extern int nni_http_req_alloc_data(nni_http_req *, size_t);
 extern int nni_http_res_alloc_data(nni_http_res *, size_t);
 extern const char *nni_http_req_get_method(const nni_http_req *);
-extern const char *nni_http_req_get_version(const nni_http_req *);
 extern const char *nni_http_req_get_uri(const nni_http_req *);
 extern void        nni_http_req_set_method(nni_http_req *, const char *);
-extern int         nni_http_req_set_version(nni_http_req *, const char *);
 extern int         nni_http_req_set_uri(nni_http_req *, const char *);
 extern int         nni_http_req_set_url(nni_http_req *, const nng_url *);
 extern uint16_t    nni_http_res_get_status(const nni_http_res *);
 extern void        nni_http_res_set_status(nni_http_res *, uint16_t);
-extern const char *nni_http_res_get_version(const nni_http_res *);
-extern int         nni_http_res_set_version(nni_http_res *, const char *);
 extern const char *nni_http_res_get_reason(const nni_http_res *);
 extern int         nni_http_res_set_reason(nni_http_res *, const char *);
 
@@ -389,5 +385,8 @@ extern const char *nni_http_stream_scheme(const char *);
 
 // Private method used for the server.
 extern bool nni_http_conn_res_sent(nni_http_conn *conn);
+
+extern const char *nni_http_conn_get_version(nng_http *conn);
+extern int         nni_http_conn_set_version(nng_http *conn, const char *vers);
 
 #endif // NNG_SUPPLEMENTAL_HTTP_HTTP_API_H

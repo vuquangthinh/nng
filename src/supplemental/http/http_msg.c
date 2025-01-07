@@ -65,7 +65,6 @@ nni_http_req_reset(nni_http_req *req)
 	req->uri = NULL;
 	nni_free(req->buf, req->bufsz);
 	nni_http_req_set_method(req, NULL);
-	nni_http_req_set_version(req, NNG_HTTP_VERSION_1_1);
 	req->bufsz  = 0;
 	req->buf    = NULL;
 	req->parsed = false;
@@ -556,7 +555,6 @@ nni_http_req_init(nni_http_req *req)
 	req->data.size = 0;
 	req->data.own  = false;
 	req->uri       = NULL;
-	nni_http_req_set_version(req, NNG_HTTP_VERSION_1_1);
 	nni_http_req_set_method(req, "GET");
 }
 
@@ -635,41 +633,6 @@ nni_http_res_get_version(const nni_http_res *res)
 	return (res->vers);
 }
 
-static const char *http_versions[] = {
-	// for efficiency, we order in most likely first
-	"HTTP/1.1",
-	"HTTP/2",
-	"HTTP/3",
-	"HTTP/1.0",
-	"HTTP/0.9",
-	NULL,
-};
-
-static int
-http_set_version(const char **ptr, const char *vers)
-{
-	vers = vers != NULL ? vers : NNG_HTTP_VERSION_1_1;
-	for (int i = 0; http_versions[i] != NULL; i++) {
-		if (strcmp(vers, http_versions[i]) == 0) {
-			*ptr = http_versions[i];
-			return (0);
-		}
-	}
-	return (NNG_ENOTSUP);
-}
-
-int
-nni_http_req_set_version(nni_http_req *req, const char *vers)
-{
-	return (http_set_version(&req->vers, vers));
-}
-
-int
-nni_http_res_set_version(nni_http_res *res, const char *vers)
-{
-	return (http_set_version(&res->vers, vers));
-}
-
 int
 nni_http_req_set_uri(nni_http_req *req, const char *uri)
 {
@@ -733,7 +696,7 @@ http_scan_line(void *vbuf, size_t n, size_t *lenp)
 }
 
 static int
-http_req_parse_line(nni_http_req *req, void *line)
+http_req_parse_line(nng_http *conn, nni_http_req *req, void *line)
 {
 	int   rv;
 	char *method;
@@ -755,7 +718,7 @@ http_req_parse_line(nni_http_req *req, void *line)
 
 	nni_http_req_set_method(req, method);
 	if (((rv = nni_http_req_set_uri(req, uri)) != 0) ||
-	    ((rv = nni_http_req_set_version(req, version)) != 0)) {
+	    ((rv = nni_http_conn_set_version(conn, version)) != 0)) {
 		return (rv);
 	}
 	req->parsed = true;
@@ -763,13 +726,14 @@ http_req_parse_line(nni_http_req *req, void *line)
 }
 
 static int
-http_res_parse_line(nni_http_res *res, uint8_t *line)
+http_res_parse_line(nng_http *conn, uint8_t *line)
 {
-	int   rv;
-	char *reason;
-	char *codestr;
-	char *version;
-	int   status;
+	int           rv;
+	char         *reason;
+	char         *codestr;
+	char         *version;
+	int           status;
+	nng_http_res *res = nni_http_conn_res(conn);
 
 	version = (char *) line;
 	if ((codestr = strchr(version, ' ')) == NULL) {
@@ -791,7 +755,7 @@ http_res_parse_line(nni_http_res *res, uint8_t *line)
 
 	nni_http_res_set_status(res, (uint16_t) status);
 
-	if (((rv = nni_http_res_set_version(res, version)) != 0) ||
+	if (((rv = nni_http_conn_set_version(conn, version)) != 0) ||
 	    ((rv = nni_http_res_set_reason(res, reason)) != 0)) {
 		return (rv);
 	}
@@ -806,12 +770,13 @@ http_res_parse_line(nni_http_res *res, uint8_t *line)
 // be updated even in the face of errors (esp. NNG_EAGAIN, which is
 // not an error so much as a request for more data.)
 int
-nni_http_req_parse(nni_http_req *req, void *buf, size_t n, size_t *lenp)
+nni_http_req_parse(nng_http *conn, void *buf, size_t n, size_t *lenp)
 {
 
-	size_t len = 0;
-	size_t cnt;
-	int    rv = 0;
+	size_t        len = 0;
+	size_t        cnt;
+	int           rv  = 0;
+	nni_http_req *req = nni_http_conn_req(conn);
 
 	for (;;) {
 		uint8_t *line;
@@ -831,7 +796,7 @@ nni_http_req_parse(nni_http_req *req, void *buf, size_t n, size_t *lenp)
 		if (req->parsed) {
 			rv = http_parse_header(&req->hdrs, line);
 		} else {
-			rv = http_req_parse_line(req, line);
+			rv = http_req_parse_line(conn, req, line);
 		}
 
 		if (rv != 0) {
@@ -844,12 +809,13 @@ nni_http_req_parse(nni_http_req *req, void *buf, size_t n, size_t *lenp)
 }
 
 int
-nni_http_res_parse(nni_http_res *res, void *buf, size_t n, size_t *lenp)
+nni_http_res_parse(nng_http *conn, void *buf, size_t n, size_t *lenp)
 {
 
-	size_t len = 0;
-	size_t cnt;
-	int    rv = 0;
+	size_t        len = 0;
+	size_t        cnt;
+	int           rv  = 0;
+	nng_http_res *res = nni_http_conn_res(conn);
 	for (;;) {
 		uint8_t *line;
 		if ((rv = http_scan_line(buf, n, &cnt)) != 0) {
@@ -868,7 +834,7 @@ nni_http_res_parse(nni_http_res *res, void *buf, size_t n, size_t *lenp)
 		if (res->parsed) {
 			rv = http_parse_header(&res->hdrs, line);
 		} else {
-			rv = http_res_parse_line(res, line);
+			rv = http_res_parse_line(conn, line);
 		}
 
 		if (rv != 0) {

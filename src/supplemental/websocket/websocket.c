@@ -1527,7 +1527,7 @@ ws_handler(nng_http_conn *conn, void *arg, nng_aio *aio)
 	}
 
 	// Now check the headers, etc.
-	if (strcmp(nni_http_req_get_version(req), "HTTP/1.1") != 0) {
+	if (strcmp(nni_http_conn_get_version(conn), "HTTP/1.1") != 0) {
 		status = NNG_HTTP_STATUS_HTTP_VERSION_NOT_SUPP;
 		goto err;
 	}

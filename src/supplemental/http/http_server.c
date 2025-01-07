@@ -537,7 +537,7 @@ http_sconn_rxdone(void *arg)
 	// Validate the request -- it has to at least look like HTTP
 	// 1.x.  We flatly refuse to deal with HTTP 0.9, and we can't
 	// cope with HTTP/2.
-	if ((val = nni_http_req_get_version(req)) == NULL) {
+	if ((val = nni_http_conn_get_version(sc->conn)) == NULL) {
 		sc->close = true;
 		http_sconn_error(sc, NNG_HTTP_STATUS_BAD_REQUEST);
 		return;

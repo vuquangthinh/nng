@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "core/nng_impl.h"
+#include "nng/supplemental/http/http.h"
 #include "supplemental/tls/tls_api.h"
 
 #include "http_api.h"
@@ -196,7 +197,7 @@ http_rd_buf(nni_http_conn *conn, nni_aio *aio)
 		return (NNG_EAGAIN);
 
 	case HTTP_RD_REQ:
-		rv = nni_http_req_parse(&conn->req, rbuf, cnt, &n);
+		rv = nni_http_req_parse(conn, rbuf, cnt, &n);
 		conn->rd_get += n;
 		if (conn->rd_get == conn->rd_put) {
 			conn->rd_get = conn->rd_put = 0;
@@ -212,7 +213,7 @@ http_rd_buf(nni_http_conn *conn, nni_aio *aio)
 		return (rv);
 
 	case HTTP_RD_RES:
-		rv = nni_http_res_parse(&conn->res, rbuf, cnt, &n);
+		rv = nni_http_res_parse(conn, rbuf, cnt, &n);
 		conn->rd_get += n;
 		if (conn->rd_get == conn->rd_put) {
 			conn->rd_get = conn->rd_put = 0;
@@ -637,6 +638,36 @@ nni_http_write_full(nni_http_conn *conn, nni_aio *aio)
 	nni_mtx_unlock(&conn->mtx);
 }
 
+const char *
+nni_http_conn_get_version(nng_http *conn)
+{
+	return (conn->req.vers);
+}
+
+int
+nni_http_conn_set_version(nng_http *conn, const char *vers)
+{
+	static const char *http_versions[] = {
+		// for efficiency, we order in most likely first
+		"HTTP/1.1",
+		"HTTP/2",
+		"HTTP/3",
+		"HTTP/1.0",
+		"HTTP/0.9",
+		NULL,
+	};
+
+	vers = vers != NULL ? vers : NNG_HTTP_VERSION_1_1;
+	for (int i = 0; http_versions[i] != NULL; i++) {
+		if (strcmp(vers, http_versions[i]) == 0) {
+			conn->req.vers = http_versions[i];
+			conn->res.vers = http_versions[i];
+			return (0);
+		}
+	}
+	return (NNG_ENOTSUP);
+}
+
 int
 nni_http_conn_getopt(
     nni_http_conn *conn, const char *name, void *buf, size_t *szp, nni_type t)
@@ -688,6 +719,7 @@ http_init(nni_http_conn **connp, nng_stream *data)
 	nni_aio_list_init(&conn->wrq);
 	nni_http_req_init(&conn->req);
 	nni_http_res_init(&conn->res);
+	nni_http_conn_set_version(conn, NNG_HTTP_VERSION_1_1);
 
 	if ((conn->rd_buf = nni_alloc(HTTP_BUFSIZE)) == NULL) {
 		nni_http_conn_fini(conn);

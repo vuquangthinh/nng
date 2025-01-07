@@ -263,7 +263,7 @@ const char *
 nng_http_get_version(nng_http *conn)
 {
 #ifdef NNG_SUPP_HTTP
-	return (nni_http_req_get_version(nni_http_conn_req(conn)));
+	return (nni_http_conn_get_version(conn));
 #else
 	NNI_ARG_UNUSED(res);
 	return (NULL);
@@ -360,7 +360,7 @@ nng_http_get_reason(nng_http *conn)
 }
 
 int
-nng_http_set_reason(nng_http_conn *conn, const char *reason)
+nng_http_set_reason(nng_http *conn, const char *reason)
 {
 #ifdef NNG_SUPP_HTTP
 	return (nni_http_res_set_reason(nni_http_conn_res(conn), reason));
@@ -372,11 +372,10 @@ nng_http_set_reason(nng_http_conn *conn, const char *reason)
 }
 
 int
-nng_http_set_version(nng_http_conn *conn, const char *version)
+nng_http_set_version(nng_http *conn, const char *version)
 {
 #ifdef NNG_SUPP_HTTP
-	(void) nni_http_res_set_version(nni_http_conn_res(conn), version);
-	return (nni_http_req_set_version(nni_http_conn_req(conn), version));
+	return (nni_http_conn_set_version(conn, version));
 #else
 	return (NNG_ENOTSUP);
 #endif
