@@ -52,8 +52,7 @@ TestMain("HTTP Client", {
 
 			So(http != NULL);
 
-			So(nng_http_req_alloc(&req, url) == 0);
-			Reset({ nng_http_req_free(req); });
+			req = nng_http_conn_req(http);
 			nng_http_conn_write_req(http, req, aio);
 			res = nng_http_conn_res(http);
 
@@ -62,7 +61,7 @@ TestMain("HTTP Client", {
 			nng_http_conn_read_res(http, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
-			So(nng_http_res_get_status(res) == 200);
+			So(nng_http_get_status(http) == 200);
 
 			Convey("The message contents are correct", {
 				void       *data;
@@ -132,7 +131,7 @@ TestMain("HTTP Client", {
 			nng_http_conn_transact(conn, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
-			So(nng_http_res_get_status(res) == 200);
+			So(nng_http_get_status(conn) == 200);
 			nng_http_res_get_data(res, &data, &len);
 		});
 
@@ -160,7 +159,7 @@ TestMain("HTTP Client", {
 			nng_http_conn_transact(conn, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
-			So(nng_http_res_get_status(res) == 200);
+			So(nng_http_get_status(conn) == 200);
 			nng_http_res_get_data(res, &data, &len);
 
 			nng_http_conn_reset(conn);
@@ -168,7 +167,7 @@ TestMain("HTTP Client", {
 			nng_http_conn_transact(conn, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
-			So(nng_http_res_get_status(res) == 200);
+			So(nng_http_get_status(conn) == 200);
 			nng_http_res_get_data(res, &data, &len);
 		});
 	});
@@ -249,7 +248,7 @@ TestMain("HTTP Client", {
 			nng_http_conn_transact(conn, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
-			So(nng_http_res_get_status(res) == 200);
+			So(nng_http_get_status(conn) == 200);
 			nng_http_res_get_data(res, &data, &len);
 		});
 	});

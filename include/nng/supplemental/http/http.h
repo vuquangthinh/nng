@@ -170,18 +170,6 @@ NNG_DECL void nng_http_req_get_data(nng_http_req *, void **, size_t *);
 // nng_http_res represents an HTTP response.
 typedef struct nng_http_res nng_http_res;
 
-// nng_http_res_alloc creates a vanilla HTTP response object.  The object is
-// initialized for an HTTP/1.1 200 OK response by default.
-NNG_DECL int nng_http_res_alloc(nng_http_res **);
-
-// nng_http_res_alloc_error creates an error HTTP response object.  The object
-// is initialized for an HTTP/1.1 response, and contains an associated
-// generic HTML error page.
-NNG_DECL int nng_http_res_alloc_error(nng_http_res **, uint16_t);
-
-// nng_http_res_free frees an HTTP response object.
-NNG_DECL void nng_http_res_free(nng_http_res *);
-
 // nng_http_res_get_status returns the HTTP status code from the server.
 NNG_DECL uint16_t nng_http_res_get_status(const nng_http_res *);
 
@@ -237,10 +225,11 @@ NNG_DECL int nng_http_res_set_data(nng_http_res *, const void *, size_t);
 // probably set the content-type header.
 NNG_DECL int nng_http_res_copy_data(nng_http_res *, const void *, size_t);
 
-// An nng_http_conn represents an underlying "connection".  It may be
+// An nng_http represents an underlying "connection".  It may be
 // a TCP channel, or a TLS channel, but the main thing is that this is
 // normally only used for exchanging HTTP requests and responses.
 typedef struct nng_http_conn nng_http_conn;
+typedef struct nng_http_conn nng_http;
 
 // These methods obtain a pointer to the request or response structure
 // that is embedded in the conn structure.
@@ -292,15 +281,19 @@ NNG_DECL void nng_http_conn_read_res(nng_http_conn *, nng_aio *);
 // and the response.  It should be used when reusing the connection.
 NNG_DECL void nng_http_conn_reset(nng_http_conn *);
 
-// nng_http_conn_get_status gets the status of the last transaction
-NNG_DECL uint16_t nng_http_conn_get_status(nng_http_conn *);
+// nng_http_get_status gets the status of the last transaction
+NNG_DECL uint16_t nng_http_get_status(nng_http *);
 
-// nng_http_conn_get_reason gets the message associated with status of the last
+// nng_http_conn_reason gets the message associated with status of the last
 // transaction
-NNG_DECL const char *nng_http_conn_get_reason(nng_http_conn *);
+NNG_DECL const char *nng_http_get_reason(nng_http *);
 
-// nng_http_conn_set_status sets the status for the transaction (server API).
-NNG_DECL uint16_t nng_http_conn_get_status(nng_http_conn *);
+// nng_http_set_status sets the status for the transaction (server API).
+NNG_DECL void nng_http_set_status(nng_http *, uint16_t);
+
+// nng_http_set_reason sets the message associated with status of the
+// transaction (server API)
+NNG_DECL int nng_http_set_reason(nng_http *, const char *);
 
 // nng_http_handler is a handler used on the server side to handle HTTP
 // requests coming into a specific URL.
@@ -469,11 +462,7 @@ NNG_DECL int nng_http_server_get_addr(nng_http_server *, nng_sockaddr *);
 
 // nng_http_server_set_error_page sets a custom error page (HTML) content
 // to be sent for the given error code.  This is used when the error is
-// generated internally by the framework, or when the application returns
-// the response back to the server via the handler's aio, and the response
-// was allocated with nng_http_res_alloc_error.  If the response was not
-// allocated this way, or the application writes the response itself instead
-// of letting the server do so, then this setting will be ignored.
+// generated internally by the framework.
 NNG_DECL int nng_http_server_set_error_page(
     nng_http_server *, uint16_t, const char *);
 
@@ -487,7 +476,7 @@ NNG_DECL int nng_http_server_set_error_file(
 // nng_http_server_res_error takes replaces the body of the response with
 // a custom error page previously set for the server, using the status
 // of the response.  The response must have the status set first using
-// nng_http_res_set_status or implicitly via nng_http_res_alloc_error.
+// nng_http_res_set_status.
 NNG_DECL int nng_http_server_res_error(nng_http_server *, nng_http_res *);
 
 // nng_http_hijack is intended to be called by a handler that wishes to

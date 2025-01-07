@@ -417,7 +417,7 @@ http_sconn_error(http_sconn *sc, uint16_t err)
 	nni_http_res *res;
 
 	res = nng_http_conn_res(sc->conn);
-	nni_http_res_set_status(res, err);
+	nng_http_res_set_status(res, err);
 	if (nni_http_server_res_error(sc->server, res) != 0) {
 		http_sconn_close(sc);
 		return;

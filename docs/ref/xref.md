@@ -243,6 +243,33 @@
 [`nng_sockaddr_inproc`]: /TODO.md
 [`nng_sockaddr_abstract`]: /TODO.md
 
+<!-- HTTP -->
+
+[`nng_http_get_version`]: /TODO.md
+[`nng_http_get_reason`]: /TODO.md
+[`nng_http_set_version`]: /TODO.md
+[`nng_http_get_status`]: /TODO.md
+[`nng_http_set_status`]: /TODO.md
+[`nng_http_set_reason`]: /TODO.md
+[`nng_http_get_method`]: /TODO.md
+[`nng_http_set_method`]: /TODO.md
+[`nng_http_set_url`]: /TODO.md
+[`nng_http_get_url`]: /TODO.md
+[`nng_http_hijack`]: /TODO.md
+[`nng_http_get_response_headers`]: /TODO.md
+[`nng_http_set_response_headers`]: /TODO.md
+[`nng_http_get_request_headers`]: /TODO.md
+[`nng_http_set_response_headers`]: /TODO.md
+[`nng_http_headers_add`]: /TODO.md
+[`nng_http_headers_del`]: /TODO.md
+[`nng_http_headers_next`]: /TODO.md
+[`nng_http_headers_get`]: /TODO.md
+[`nng_http_headers_set`]: /TODO.md
+[`nng_http_set_response_body`]: /TODO.md
+[`nng_http_get_response_body`]: /TODO.md
+[`nng_http_read_response_body`]: /TODO.md
+[`nng_http_read_request_body`]: /TODO.md
+
 <!-- Macros -->
 
 [`NNG_EINTR`]: /api/errors.md#NNG_EINTR

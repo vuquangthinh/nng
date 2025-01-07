@@ -648,18 +648,6 @@ nni_http_res_init(nni_http_res *res)
 	res->code      = 0;
 }
 
-int
-nni_http_res_alloc(nni_http_res **resp)
-{
-	nni_http_res *res;
-	if ((res = NNI_ALLOC_STRUCT(res)) == NULL) {
-		return (NNG_ENOMEM);
-	}
-	nni_http_res_init(res);
-	*resp = res;
-	return (0);
-}
-
 const char *
 nni_http_req_get_method(const nni_http_req *req)
 {
@@ -1073,23 +1061,5 @@ nni_http_res_set_error(nni_http_res *res, uint16_t err)
 	nni_strfree(html);
 	res->code  = err;
 	res->iserr = true;
-	return (0);
-}
-
-int
-nni_http_res_alloc_error(nni_http_res **resp, uint16_t err)
-{
-	nni_http_res *res;
-	int           rv;
-
-	if ((rv = nni_http_res_alloc(&res)) != 0) {
-		return (rv);
-	}
-	rv = nni_http_res_set_error(res, err);
-	if (rv != 0) {
-		nni_http_res_free(res);
-		return (rv);
-	}
-	*resp = res;
 	return (0);
 }

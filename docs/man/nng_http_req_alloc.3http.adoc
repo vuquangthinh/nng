@@ -61,7 +61,6 @@ xref:nng_http_req_set_data.3http.adoc[nng_http_req_set_data(3http)],
 xref:nng_http_req_set_method.3http.adoc[nng_http_req_set_method(3http)],
 xref:nng_http_req_set_uri.3http.adoc[nng_http_req_set_uri(3http)],
 xref:nng_http_req_set_version.3http.adoc[nng_http_req_set_version(3http)],
-xref:nng_http_res_alloc.3http.adoc[nng_http_res_alloc(3http)],
 xref:nng_url_parse.3.adoc[nng_url_parse(3)]
 xref:nng_strerror.3.adoc[nng_strerror(3)],
 xref:nng.7.adoc[nng(7)]

@@ -42,7 +42,6 @@ None.
 == SEE ALSO
 
 [.text-left]
-xref:nng_http_res_alloc.3http.adoc[nng_http_res_alloc(3http)],
 xref:nng_http_res_get_status.3http.adoc[nng_http_res_get_status(3http)],
 xref:nng_http_res_set_reason.3http.adoc[nng_http_res_set_reason(3http)],
 xref:nng.7.adoc[nng(7)]

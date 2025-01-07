@@ -124,11 +124,8 @@ and connections.
 |xref:nng_http_req_set_uri.3http.adoc[nng_http_req_set_uri()]|set HTTP request URI
 |xref:nng_http_req_set_version.3http.adoc[nng_http_req_set_version()]|set HTTP request protocol version
 |xref:nng_http_res_add_header.3http.adoc[nng_http_res_add_header()]|add HTTP response header
-|xref:nng_http_res_alloc.3http.adoc[nng_http_res_alloc()]|allocate HTTP response structure
-|xref:nng_http_res_alloc_error.3http.adoc[nng_http_res_alloc_error()]|allocate HTTP error response
 |xref:nng_http_res_copy_data.3http.adoc[nng_http_res_copy_data()]|copy HTTP response body
 |xref:nng_http_res_del_header.3http.adoc[nng_http_res_del_header()]|delete HTTP response header
-|xref:nng_http_res_free.3http.adoc[nng_http_res_free()]|free HTTP response structure
 |xref:nng_http_res_get_data.3http.adoc[nng_http_res_get_data()]|get HTTP response body
 |xref:nng_http_res_get_header.3http.adoc[nng_http_res_get_header()]|return HTTP response header
 |xref:nng_http_res_get_reason.3http.adoc[nng_http_res_get_reason()]|return HTTP response reason
