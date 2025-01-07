@@ -1581,7 +1581,7 @@ ws_handler(nng_http_conn *conn, void *arg, nng_aio *aio)
 		goto err;
 	}
 
-	nni_http_conn_set_status(conn, NNG_HTTP_STATUS_SWITCHING);
+	nni_http_conn_set_status(conn, NNG_HTTP_STATUS_SWITCHING, NULL);
 
 	if ((SETH("Connection", "Upgrade") != 0) ||
 	    (SETH("Upgrade", "websocket") != 0) ||

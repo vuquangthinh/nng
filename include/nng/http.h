@@ -189,9 +189,9 @@ typedef struct nng_http_conn nng_http;
 NNG_DECL nng_http_req *nng_http_conn_req(nng_http_conn *);
 NNG_DECL nng_http_res *nng_http_conn_res(nng_http_conn *);
 
-// nng_http_conn_close closes the underlying channel.  Applications should
+// nng_http_close closes the underlying channel.  Applications should
 // not use this channel after this operation is performed.
-NNG_DECL void nng_http_conn_close(nng_http_conn *);
+NNG_DECL void nng_http_close(nng_http *);
 
 // nng_http_conn_read attempts to read data from the connection.  This
 // completes as soon as at least one byte is read; it does not wait
@@ -240,12 +240,10 @@ NNG_DECL uint16_t nng_http_get_status(nng_http *);
 // transaction
 NNG_DECL const char *nng_http_get_reason(nng_http *);
 
-// nng_http_set_status sets the status for the transaction (server API).
-NNG_DECL void nng_http_set_status(nng_http *, uint16_t);
-
-// nng_http_set_reason sets the message associated with status of the
-// transaction (server API)
-NNG_DECL int nng_http_set_reason(nng_http *, const char *);
+// nng_http_set_status sets the status for the transaction (server API),
+// and also sets the reason (message) for it.  (If NULL is used for the reason,
+// then a builtin value is used based on the code.)
+NNG_DECL int nng_http_set_status(nng_http *, uint16_t, const char *);
 
 // nng_http_set_version is used to change the version of a request.
 // Normally the version is "HTTP/1.1".  Note that the framework does

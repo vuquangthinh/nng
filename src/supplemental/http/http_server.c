@@ -416,7 +416,7 @@ http_sconn_error(http_sconn *sc, uint16_t err)
 	nni_http_res *res;
 
 	res = nng_http_conn_res(sc->conn);
-	nng_http_set_status(sc->conn, err);
+	nng_http_set_status(sc->conn, err, NULL);
 	if (nni_http_server_error(sc->server, sc->conn) != 0) {
 		http_sconn_close(sc);
 		return;
@@ -1333,7 +1333,7 @@ http_handle_file(nng_http *conn, void *arg, nni_aio *aio)
 		return;
 	}
 
-	nng_http_set_status(conn, NNG_HTTP_STATUS_OK);
+	nng_http_set_status(conn, NNG_HTTP_STATUS_OK, NULL);
 
 	nni_free(data, size);
 	nni_aio_set_output(aio, 0, res);
@@ -1523,7 +1523,7 @@ http_handle_dir(nng_http *conn, void *arg, nng_aio *aio)
 		return;
 	}
 
-	nng_http_set_status(conn, NNG_HTTP_STATUS_OK);
+	nng_http_set_status(conn, NNG_HTTP_STATUS_OK, NULL);
 
 	nni_free(data, size);
 	nni_aio_set_output(aio, 0, res);
@@ -1606,7 +1606,7 @@ http_handle_redirect(nng_http *conn, void *data, nng_aio *aio)
 		return;
 	}
 
-	nni_http_conn_set_status(conn, hr->code);
+	nng_http_set_status(conn, hr->code, NULL);
 
 	if (loc != hr->where) {
 		nni_strfree(loc);
@@ -1691,7 +1691,7 @@ http_handle_static(nng_http *conn, void *data, nni_aio *aio)
 		return;
 	}
 
-	nng_http_set_status(conn, NNG_HTTP_STATUS_OK);
+	nng_http_set_status(conn, NNG_HTTP_STATUS_OK, NULL);
 
 	nni_aio_set_output(aio, 0, r);
 	nni_aio_finish(aio, 0, 0);

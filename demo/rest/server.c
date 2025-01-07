@@ -171,7 +171,7 @@ rest_job_cb(void *arg)
 			rest_http_fatal(job, rv);
 			return;
 		}
-		nng_http_set_status(job->conn, NNG_HTTP_STATUS_OK);
+		nng_http_set_status(job->conn, NNG_HTTP_STATUS_OK, NULL);
 		nng_aio_finish(job->http_aio, 0);
 		job->http_aio = NULL;
 		// We are done with the job.

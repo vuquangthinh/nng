@@ -726,10 +726,13 @@ http_res_parse_line(nng_http *conn, uint8_t *line)
 		return (NNG_EPROTO);
 	}
 
-	nni_http_conn_set_status(conn, (uint16_t) status);
+	if ((rv = nni_http_conn_set_status(conn, (uint16_t) status, reason)) !=
+	    0) {
+		return (rv);
+	}
 
-	if (((rv = nni_http_conn_set_version(conn, version)) != 0) ||
-	    ((rv = nni_http_conn_set_reason(conn, reason)) != 0)) {
+	if ((rv = nni_http_conn_set_version(conn, version)) != 0) {
+
 		return (rv);
 	}
 	res->parsed = true;

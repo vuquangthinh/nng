@@ -32,8 +32,6 @@ typedef struct nng_http_chunks  nni_http_chunks;
 // These functions are private to the internal framework, and really should
 // not be used elsewhere.
 
-extern const char *nni_http_reason(uint16_t);
-
 extern void  nni_http_req_init(nni_http_req *);
 extern void  nni_http_req_reset(nni_http_req *);
 extern int   nni_http_req_get_buf(nni_http_req *, void **, size_t *);
@@ -101,7 +99,7 @@ extern void *nni_http_conn_get_ctx(nni_http_conn *);
 // and are not for use by other code.
 extern int nni_http_conn_init(nni_http_conn **, nng_stream *);
 
-extern void nni_http_conn_close(nni_http_conn *);
+extern void nni_http_conn_close(nng_http *);
 extern void nni_http_conn_fini(nni_http_conn *);
 extern int  nni_http_conn_getopt(
      nni_http_conn *, const char *, void *, size_t *, nni_type);
@@ -373,7 +371,9 @@ extern int         nni_http_conn_set_version(nng_http *conn, const char *vers);
 extern void nni_http_conn_set_method(nng_http *conn, const char *method);
 extern const char *nni_http_conn_get_method(nng_http *conn);
 
-extern void        nni_http_conn_set_status(nng_http *conn, uint16_t status);
+extern int nni_http_conn_set_status(
+    nng_http *conn, uint16_t status, const char *reason);
+
 extern uint16_t    nni_http_conn_get_status(nng_http *);
 extern const char *nni_http_conn_get_reason(nng_http *);
 extern int         nni_http_conn_set_reason(nng_http *, const char *);

@@ -41,7 +41,7 @@ TestMain("HTTP Client", {
 		http = nng_aio_get_output(aio, 0);
 		Reset({
 			nng_http_client_free(cli);
-			nng_http_conn_close(http);
+			nng_http_close(http);
 			nng_aio_free(aio);
 			nng_url_free(url);
 		});
@@ -123,7 +123,7 @@ TestMain("HTTP Client", {
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
 			conn = nng_aio_get_output(aio, 0);
-			Reset({ nng_http_conn_close(conn); });
+			Reset({ nng_http_close(conn); });
 
 			req = nng_http_conn_req(conn);
 			res = nng_http_conn_res(conn);
@@ -145,7 +145,7 @@ TestMain("HTTP Client", {
 
 			Reset({
 				if (conn != NULL) {
-					nng_http_conn_close(conn);
+					nng_http_close(conn);
 				}
 			});
 
@@ -244,7 +244,7 @@ TestMain("HTTP Client", {
 			conn = nng_aio_get_output(aio, 0);
 			req  = nng_http_conn_req(conn);
 			res  = nng_http_conn_res(conn);
-			Reset({ nng_http_conn_close(conn); });
+			Reset({ nng_http_close(conn); });
 			So(nng_http_req_set_url(req, url) == 0);
 			nng_http_conn_transact(conn, aio);
 			nng_aio_wait(aio);

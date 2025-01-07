@@ -79,14 +79,23 @@ there is little need to use this, but there are some subtle semantic differences
 
 ```c
 uint16_t nng_http_get_status(nng_http *conn);
-void nng_http_set_status(nng_http *conn, uint16_t status);
+const char *nng_http_get_reason(nng_http_conn *conn);
+void nng_http_set_status(nng_http *conn, uint16_t status, const char *reason);
 ```
 
 The {{i:`nng_http_get_status`}} function obtains the numeric code (typipcally numbered from 100 through 599) returned
 by the server in the last exchange on _conn_. (If no exchange has been performed yet, the result is undefined.)
 
-The {{i:`nng_http_set_status`}} function is used on a server in a handler callback to set the status code that will be
-reported to the client.
+A descriptive message matching the status code is returned by {{i:`nng_http_get_reason`}}.
+
+The {{i:`nng_http_set_status`}} function is used on a server in a handler callback to set the status codethat will be
+reported to the client to _status_, and the associated text (reason) to _reason_. If _reason_ is `NULL`,
+then a built in reason based on the _status_ will be used instead.
+
+> [!TIP]
+> Callbacks used on the server may wish to use [`nng_http_server_set_error`] or [`nng_http_server_set_redirect`] instead of
+> `nng_http_set_status`, because those functions will also set the response body to a suitable HTML document
+> for display to users.
 
 Status codes are defined by the IETF. Here are defininitions that NNG provides for convenience:
 
@@ -153,6 +162,17 @@ Status codes are defined by the IETF. Here are defininitions that NNG provides f
 | `NNG_HTTP_STATUS_NOT_EXTENDED`<a name="#NNG_HTTP_STATUS_NOT_EXTENDED"></a>                       | 510  | Not Extended                    |
 | `NNG_HTTP_STATUS_NETWORK_AUTH_REQUIRED`<a name="#NNG_HTTP_STATUS_NETWORK_AUTH_REQUIRED"></a>     | 511  | Network Authentication Required |
 
+### Closing the Connection
+
+```c
+void nng_http_close(nng_http *conn);
+```
+
+The {{i:`nng_http_close`}} function closes the supplied HTTP connection _conn_,
+including any disposing of any underlying file descriptors or related resources.
+
+Once this function, no further access to the _conn_ structure may be made.
+
 ### Hijacking Connections
 
 ```c
@@ -218,7 +238,7 @@ The {{i:`nng_http_client_free`}} connection destroys the client object and any
 of its resources.
 
 > [!NOTE]
-> Any connections created by [`nng_http_client_client`] are not affected by this function,
+> Any connections created by [`nng_http_client_connect`] are not affected by this function,
 > and must be closed explicitly as needed.
 
 ### Client TLS
@@ -339,3 +359,5 @@ A descriptive message matching the status code is returned by {{i:`nng_http_get_
 ## Server API
 
 ### Handlers
+
+{{#include ../xref.md}}

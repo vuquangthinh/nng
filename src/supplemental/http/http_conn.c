@@ -686,12 +686,6 @@ nni_http_conn_get_method(nng_http *conn)
 	return (conn->req.meth);
 }
 
-void
-nni_http_conn_set_status(nng_http *conn, uint16_t status)
-{
-	conn->res.code = status;
-}
-
 uint16_t
 nni_http_conn_get_status(nng_http *conn)
 {
@@ -813,6 +807,26 @@ int
 nni_http_conn_set_reason(nng_http *conn, const char *reason)
 {
 	char *dup = NULL;
+	if ((reason != NULL) &&
+	    (strcmp(reason, nni_http_reason(conn->res.code)) == 0)) {
+		reason = NULL;
+		return (0);
+	}
+	if ((reason != NULL) && (dup = nni_strdup(reason)) == NULL) {
+		return (NNG_ENOMEM);
+	}
+	if (conn->res.rsn != NULL) {
+		nni_strfree(conn->res.rsn);
+	}
+	conn->res.rsn = dup;
+	return (0);
+}
+
+int
+nni_http_conn_set_status(nng_http *conn, uint16_t status, const char *reason)
+{
+	conn->res.code = status;
+	char *dup      = NULL;
 	if ((reason != NULL) &&
 	    (strcmp(reason, nni_http_reason(conn->res.code)) == 0)) {
 		reason = NULL;

@@ -257,14 +257,16 @@ nng_http_conn_res(nng_http_conn *conn)
 #endif
 }
 
-void
-nng_http_set_status(nng_http *conn, uint16_t status)
+int
+nng_http_set_status(nng_http *conn, uint16_t status, const char *reason)
 {
 #ifdef NNG_SUPP_HTTP
-	nni_http_conn_set_status(conn, status);
+	return (nni_http_conn_set_status(conn, status, reason));
 #else
 	NNI_ARG_UNUSED(res);
 	NNI_ARG_UNUSED(status);
+	NNI_ARG_UNUSED(reason);
+	return (NNG_ENOTSUP);
 #endif
 }
 
@@ -293,18 +295,6 @@ nng_http_get_reason(nng_http *conn)
 }
 
 int
-nng_http_set_reason(nng_http *conn, const char *reason)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_conn_set_reason(conn, reason));
-#else
-	NNI_ARG_UNUSED(res);
-	NNI_ARG_UNUSED(reason);
-	return (0);
-#endif
-}
-
-int
 nng_http_set_version(nng_http *conn, const char *version)
 {
 #ifdef NNG_SUPP_HTTP
@@ -326,7 +316,7 @@ nng_http_set_method(nng_http_conn *conn, const char *method)
 }
 
 void
-nng_http_conn_close(nng_http_conn *conn)
+nng_http_close(nng_http_conn *conn)
 {
 #ifdef NNG_SUPP_HTTP
 	// API version of this closes *and* frees the structure.

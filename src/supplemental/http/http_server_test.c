@@ -138,7 +138,7 @@ httpecho(nng_http_conn *conn, void *arg, nng_aio *aio)
 		nng_aio_finish(aio, rv);
 		return;
 	}
-	nng_http_set_status(conn, NNG_HTTP_STATUS_OK);
+	nng_http_set_status(conn, NNG_HTTP_STATUS_OK, NULL);
 	nng_aio_set_output(aio, 0, res);
 	nng_aio_finish(aio, 0);
 }
@@ -175,7 +175,7 @@ static void
 server_reset(struct server_test *st)
 {
 	if (st->conn) {
-		nng_http_conn_close(st->conn);
+		nng_http_close(st->conn);
 	}
 	nng_http_client_connect(st->cli, st->aio);
 	nng_aio_wait(st->aio);
@@ -195,7 +195,7 @@ server_free(struct server_test *st)
 		nng_http_client_free(st->cli);
 	}
 	if (st->conn != NULL) {
-		nng_http_conn_close(st->conn);
+		nng_http_close(st->conn);
 	}
 	if (st->s != NULL) {
 		nng_http_server_release(st->s);

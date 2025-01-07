@@ -258,10 +258,9 @@
 [`nng_http_get_method`]: /api/http.md#http-method
 [`nng_http_set_method`]: /api/http.md#http-method
 [`nng_http_set_url`]: /api/http.md#preparing-a-transaction
-[`nng_http_get_reason`]: /TODO.md
-[`nng_http_get_status`]: /TODO.md
-[`nng_http_set_status`]: /TODO.md
-[`nng_http_set_reason`]: /TODO.md
+[`nng_http_get_reason`]: /api/http.md#http-status
+[`nng_http_get_status`]: /api/http.md#http-status
+[`nng_http_set_status`]: /api/http.md#http-status
 [`nng_http_get_url`]: /TODO.md
 [`nng_http_hijack`]: /api/http.md#hijacking-connections
 [`nng_http_get_response_headers`]: /TODO.md
@@ -277,6 +276,8 @@
 [`nng_http_get_response_body`]: /TODO.md
 [`nng_http_read_response_body`]: /TODO.md
 [`nng_http_read_request_body`]: /TODO.md
+[`nng_http_server_set_error`]: /TODO.md
+[`nng_http_server_set_redirect`]: /TODO.md
 
 <!-- Macros -->
 
