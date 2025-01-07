@@ -286,14 +286,23 @@ NNG_DECL void nng_http_conn_read_req(nng_http_conn *, nng_aio *);
 // nng_http_conn_read_res reads an entire response, EXCEPT for any entity
 // data.  The caller is responsible for processing the headers in the response
 // and reading any submitted entity data itself.
-NNG_DECL void nng_http_conn_read_res(
-    nng_http_conn *, nng_http_res *, nng_aio *);
+NNG_DECL void nng_http_conn_read_res(nng_http_conn *, nng_aio *);
 
 // nng_http_req_reset resets the request to an initially allocated state.
 NNG_DECL void nng_http_req_reset(nng_http_req *);
 
 // nng_http_res_reset resets the response to an initially allocated state.
 NNG_DECL void nng_http_res_reset(nng_http_res *);
+
+// nng_http_conn_get_status gets the status of the last transaction
+NNG_DECL uint16_t nng_http_conn_get_status(nng_http_conn *);
+
+// nng_http_conn_get_reason gets the message associated with status of the last
+// transaction
+NNG_DECL const char *nng_http_conn_get_reason(nng_http_conn *);
+
+// nng_http_conn_set_status sets the status for the transaction (server API).
+NNG_DECL uint16_t nng_http_conn_get_status(nng_http_conn *);
 
 // nng_http_handler is a handler used on the server side to handle HTTP
 // requests coming into a specific URL.

@@ -118,7 +118,7 @@ extern int  nni_http_res_set_error(nni_http_res *, uint16_t);
 extern void nni_http_req_free(nni_http_req *);
 extern void nni_http_res_free(nni_http_res *);
 extern void nni_http_write_req(nni_http_conn *, nni_http_req *, nni_aio *);
-extern void nni_http_read_res(nni_http_conn *, nni_http_res *, nni_aio *);
+extern void nni_http_read_res(nni_http_conn *, nni_aio *);
 extern void nni_http_read_req(nni_http_conn *, nni_aio *);
 extern void nni_http_write_res(nni_http_conn *, nni_aio *);
 

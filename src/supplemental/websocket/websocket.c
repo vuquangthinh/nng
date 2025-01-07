@@ -1327,7 +1327,7 @@ ws_http_cb_dialer(nni_ws *ws, nni_aio *aio)
 	// of sending the request.  Prepare an empty response, and read it.
 	if (ws->res == NULL) {
 		ws->res = nni_http_conn_res(ws->http);
-		nni_http_read_res(ws->http, ws->res, &ws->httpaio);
+		nni_http_read_res(ws->http, &ws->httpaio);
 		nni_mtx_unlock(&d->mtx);
 		return;
 	}

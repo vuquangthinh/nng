@@ -524,9 +524,9 @@ nni_http_read_req(nni_http_conn *conn, nni_aio *aio)
 }
 
 void
-nni_http_read_res(nni_http_conn *conn, nni_http_res *res, nni_aio *aio)
+nni_http_read_res(nni_http_conn *conn, nni_aio *aio)
 {
-	nni_aio_set_prov_data(aio, res);
+	nni_aio_set_prov_data(aio, &conn->res);
 
 	nni_mtx_lock(&conn->mtx);
 	http_rd_submit(conn, aio, HTTP_RD_RES);

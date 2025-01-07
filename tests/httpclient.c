@@ -53,16 +53,13 @@ TestMain("HTTP Client", {
 			So(http != NULL);
 
 			So(nng_http_req_alloc(&req, url) == 0);
-			So(nng_http_res_alloc(&res) == 0);
-			Reset({
-				nng_http_req_free(req);
-				nng_http_res_free(res);
-			});
+			Reset({ nng_http_req_free(req); });
 			nng_http_conn_write_req(http, req, aio);
+			res = nng_http_conn_res(http);
 
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
-			nng_http_conn_read_res(http, res, aio);
+			nng_http_conn_read_res(http, aio);
 			nng_aio_wait(aio);
 			So(nng_aio_result(aio) == 0);
 			So(nng_http_res_get_status(res) == 200);

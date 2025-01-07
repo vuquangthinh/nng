@@ -69,7 +69,6 @@ main(int argc, char **argv)
 	    ((rv = nng_url_parse(&url, argv[1])) != 0) ||
 	    ((rv = nng_http_client_alloc(&client, url)) != 0) ||
 	    ((rv = nng_http_req_alloc(&req, url)) != 0) ||
-	    ((rv = nng_http_res_alloc(&res)) != 0) ||
 	    ((rv = nng_aio_alloc(&aio, NULL, NULL)) != 0)) {
 		fatal(rv);
 	}
@@ -85,6 +84,7 @@ main(int argc, char **argv)
 
 	// Get the connection, at the 0th output.
 	conn = nng_aio_get_output(aio, 0);
+	res  = nng_http_conn_res(conn);
 
 	// Request is already set up with URL, and for GET via HTTP/1.1.
 	// The Host: header is already set up too.
@@ -98,7 +98,7 @@ main(int argc, char **argv)
 	}
 
 	// Read a response.
-	nng_http_conn_read_res(conn, res, aio);
+	nng_http_conn_read_res(conn, aio);
 	nng_aio_wait(aio);
 
 	if ((rv = nng_aio_result(aio)) != 0) {

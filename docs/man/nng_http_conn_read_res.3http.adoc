@@ -1,6 +1,6 @@
 = nng_http_conn_read_res(3http)
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2025 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This document is supplied under the terms of the MIT License, a
@@ -20,14 +20,13 @@ nng_http_conn_read_res - read HTTP response
 #include <nng/nng.h>
 #include <nng/supplemental/http/http.h>
 
-void nng_http_conn_read_res(nng_http_conn *conn, nng_http_res *res,
-    nng_aio *aio);
+void nng_http_conn_read_res(nng_http_conn *conn, nng_aio *aio);
 ----
 
 == DESCRIPTION
 
 The `nng_http_conn_read_res()` function starts an asynchronous read from the
-HTTP connection _conn_, reading an HTTP response into the _res_, including all
+HTTP connection _conn_, reading an HTTP response into the response associated with _conn_, including all
 of the related headers.
 
 NOTE: Any HTTP entity/body data associated with the response is *not* read
