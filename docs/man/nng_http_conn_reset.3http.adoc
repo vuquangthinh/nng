@@ -10,7 +10,7 @@
 
 == NAME
 
-nng_http_conn_reset - reset HTTP connection request and response
+nng_http_reset - reset HTTP connection state
 
 == SYNOPSIS
 
@@ -19,12 +19,12 @@ nng_http_conn_reset - reset HTTP connection request and response
 #include <nng/nng.h>
 #include <nng/supplemental/http/http.h>
 
-void nng_http_conn_reset(nng_http_conn *conn);
+void nng_http_reset(nng_http *conn);
 ----
 
 == DESCRIPTION
 
-The `nng_http_conn_reset()` function resets the connection state so that it
+The `nng_http_reset()` function resets the connection state so that it
 is just as if it had been freshly created with
 xref:nng_http_client_connect.3http.adoc[`nng_http_client_connect()`]
 or passed into a handler function for a server callback.

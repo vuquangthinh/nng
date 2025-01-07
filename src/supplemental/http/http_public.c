@@ -892,7 +892,7 @@ nng_http_conn_transact(nng_http_conn *conn, nng_aio *aio)
 }
 
 void
-nng_http_conn_reset(nng_http_conn *conn)
+nng_http_reset(nng_http *conn)
 {
 #ifdef NNG_SUPP_HTTP
 	nni_http_req_reset(nni_http_conn_req(conn));
