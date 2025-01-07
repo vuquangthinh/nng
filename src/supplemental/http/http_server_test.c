@@ -302,7 +302,7 @@ test_server_bad_version(void)
 
 	server_setup(&st, NULL);
 
-	NUTS_PASS(nng_http_req_set_version(st.req, "HTTP/0.9"));
+	NUTS_PASS(nng_http_set_version(st.conn, "HTTP/0.9"));
 	NUTS_PASS(nng_http_req_set_uri(st.req, "/bogus"));
 	nng_http_conn_write_req(st.conn, st.req, st.aio);
 

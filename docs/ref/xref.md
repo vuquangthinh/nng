@@ -245,6 +245,7 @@
 
 <!-- HTTP -->
 
+[`nng_http_close`]: /TODO.md
 [`nng_http_get_version`]: /TODO.md
 [`nng_http_get_reason`]: /TODO.md
 [`nng_http_set_version`]: /TODO.md

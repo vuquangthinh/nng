@@ -112,8 +112,6 @@ extern int  nni_http_conn_getopt(
 // must not use them for any other purpose.
 
 extern int  nni_http_req_alloc(nni_http_req **, const nng_url *);
-extern int  nni_http_res_alloc(nni_http_res **);
-extern int  nni_http_res_alloc_error(nni_http_res **, uint16_t);
 extern int  nni_http_res_set_error(nni_http_res *, uint16_t);
 extern void nni_http_req_free(nni_http_req *);
 extern void nni_http_res_free(nni_http_res *);

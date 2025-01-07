@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2025 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -225,17 +225,6 @@ nng_http_req_get_method(const nng_http_req *req)
 }
 
 const char *
-nng_http_req_get_version(const nng_http_req *req)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_req_get_version(req));
-#else
-	NNI_ARG_UNUSED(req);
-	return (NULL);
-#endif
-}
-
-const char *
 nng_http_req_get_uri(const nng_http_req *req)
 {
 #ifdef NNG_SUPP_HTTP
@@ -254,18 +243,6 @@ nng_http_req_set_method(nng_http_req *req, const char *meth)
 #else
 	NNI_ARG_UNUSED(req);
 	NNI_ARG_UNUSED(meth);
-#endif
-}
-
-int
-nng_http_req_set_version(nng_http_req *req, const char *vers)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_req_set_version(req, vers));
-#else
-	NNI_ARG_UNUSED(req);
-	NNI_ARG_UNUSED(vers);
-	return (NNG_ENOTSUP);
 #endif
 }
 
@@ -305,10 +282,10 @@ nng_http_res_get_status(const nng_http_res *res)
 }
 
 const char *
-nng_http_res_get_version(const nng_http_res *res)
+nng_http_get_version(nng_http *conn)
 {
 #ifdef NNG_SUPP_HTTP
-	return (nni_http_res_get_version(res));
+	return (nni_http_req_get_version(nni_http_conn_req(conn)));
 #else
 	NNI_ARG_UNUSED(res);
 	return (NULL);
@@ -334,18 +311,6 @@ nng_http_res_set_status(nng_http_res *res, uint16_t status)
 #else
 	NNI_ARG_UNUSED(res);
 	NNI_ARG_UNUSED(status);
-#endif
-}
-
-int
-nng_http_res_set_version(nng_http_res *res, const char *vers)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_res_set_version(res, vers));
-#else
-	NNI_ARG_UNUSED(res);
-	NNI_ARG_UNUSED(vers);
-	return (NNG_ENOTSUP);
 #endif
 }
 
@@ -427,6 +392,18 @@ nng_http_set_reason(nng_http_conn *conn, const char *reason)
 	return (0);
 #endif
 }
+
+int
+nng_http_set_version(nng_http_conn *conn, const char *version)
+{
+#ifdef NNG_SUPP_HTTP
+	(void) nni_http_res_set_version(nni_http_conn_res(conn), version);
+	return (nni_http_req_set_version(nni_http_conn_req(conn), version));
+#else
+	return (NNG_ENOTSUP);
+#endif
+}
+
 void
 nng_http_conn_close(nng_http_conn *conn)
 {

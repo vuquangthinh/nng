@@ -108,9 +108,6 @@ NNG_DECL void nng_http_req_free(nng_http_req *);
 // nng_http_req_get_method returns the method.
 NNG_DECL const char *nng_http_req_get_method(const nng_http_req *);
 
-// nng_http_req_get_version returns the version, usually HTTP/1.1.
-NNG_DECL const char *nng_http_req_get_version(const nng_http_req *);
-
 // nng_http_req_get_uri returns the "abs-uri", which is URL without
 // the scheme, host, or port.
 NNG_DECL const char *nng_http_req_get_uri(const nng_http_req *);
@@ -137,11 +134,6 @@ NNG_DECL const char *nng_http_req_get_header(
 // The method should be an upper case HTTP method, like POST, or DELETE.
 // Null sets the default ("GET").
 NNG_DECL void nng_http_req_set_method(nng_http_req *, const char *);
-
-// nng_http_req_set_version is used to change the version of a request.
-// Normally the version is "HTTP/1.1".  Note that the framework does
-// not support HTTP/2 at all.  Null sets the default ("HTTP/1.1").
-NNG_DECL int nng_http_req_set_version(nng_http_req *, const char *);
 
 // nng_http_req_set_url is used to change the URL of a request.
 NNG_DECL int nng_http_req_set_url(nng_http_req *, const nng_url *);
@@ -201,14 +193,6 @@ NNG_DECL int nng_http_res_del_header(nng_http_res *, const char *);
 // if not found.
 NNG_DECL const char *nng_http_res_get_header(
     const nng_http_res *, const char *);
-
-// nng_http_res_set_version is used to change the version of a response.
-// Normally the version is "HTTP/1.1".  Note that the framework does
-// not support HTTP/2 at all.  NULL sets the default ("HTTP/1.1").
-NNG_DECL int nng_http_res_set_version(nng_http_res *, const char *);
-
-// nng_http_res_get_version returns the version, usually HTTP/1.1.
-NNG_DECL const char *nng_http_res_get_version(const nng_http_res *);
 
 // nng_http_res_get_data gets the data for the response.
 NNG_DECL void nng_http_res_get_data(nng_http_res *, void **, size_t *);
@@ -294,6 +278,14 @@ NNG_DECL void nng_http_set_status(nng_http *, uint16_t);
 // nng_http_set_reason sets the message associated with status of the
 // transaction (server API)
 NNG_DECL int nng_http_set_reason(nng_http *, const char *);
+
+// nng_http_set_version is used to change the version of a request.
+// Normally the version is "HTTP/1.1".  Note that the framework does
+// not support HTTP/2 at all.  Null sets the default ("HTTP/1.1").
+NNG_DECL int nng_http_set_version(nng_http *, const char *);
+
+// nng_http_get_version is used to get the version of a request.
+NNG_DECL const char *nng_http_get_version(nng_http *);
 
 // nng_http_handler is a handler used on the server side to handle HTTP
 // requests coming into a specific URL.

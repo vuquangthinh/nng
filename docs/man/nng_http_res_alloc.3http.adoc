@@ -62,6 +62,5 @@ xref:nng_http_res_reset.3http.adoc[nng_http_res_reset(3http)],
 xref:nng_http_res_set_data.3http.adoc[nng_http_res_set_data(3http)],
 xref:nng_http_res_set_reason.3http.adoc[nng_http_res_set_reason(3http)],
 xref:nng_http_res_set_status.3http.adoc[nng_http_res_set_status(3http)],
-xref:nng_http_res_set_version.3http.adoc[nng_http_res_set_version(3http)],
 xref:nng_strerror.3.adoc[nng_strerror(3)],
 xref:nng.7.adoc[nng(7)]
