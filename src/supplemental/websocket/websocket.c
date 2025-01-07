@@ -1544,7 +1544,7 @@ ws_handler(nng_http_conn *conn, void *arg, nng_aio *aio)
 	if ((((ptr = GETH("Content-Length")) != NULL) && (atoi(ptr) > 0)) ||
 	    (((ptr = GETH("Transfer-Encoding")) != NULL) &&
 	        (nni_strcasestr(ptr, "chunked") != NULL))) {
-		status = NNG_HTTP_STATUS_PAYLOAD_TOO_LARGE;
+		status = NNG_HTTP_STATUS_CONTENT_TOO_LARGE;
 		goto err;
 	}
 

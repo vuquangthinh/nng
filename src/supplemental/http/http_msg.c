@@ -838,6 +838,9 @@ static struct {
 	{ NNG_HTTP_STATUS_NO_CONTENT, "No Content" },
 	{ NNG_HTTP_STATUS_RESET_CONTENT, "Reset Content" },
 	{ NNG_HTTP_STATUS_PARTIAL_CONTENT, "Partial Content" },
+	{ NNG_HTTP_STATUS_MULTI_STATUS, "Multi-Status" },
+	{ NNG_HTTP_STATUS_ALREADY_REPORTED, "Already Reported" },
+	{ NNG_HTTP_STATUS_IM_USED, "IM Used" },
 
 	// 300 series -- redirection
 	{ NNG_HTTP_STATUS_MULTIPLE_CHOICES, "Multiple Choices" },
@@ -847,6 +850,7 @@ static struct {
 	{ NNG_HTTP_STATUS_NOT_MODIFIED, "Not Modified" },
 	{ NNG_HTTP_STATUS_USE_PROXY, "Use Proxy" },
 	{ NNG_HTTP_STATUS_TEMPORARY_REDIRECT, "Temporary Redirect" },
+	{ NNG_HTTP_STATUS_PERMANENT_REDIRECT, "Permanent Redirect" },
 
 	// 400 series -- client errors
 	{ NNG_HTTP_STATUS_BAD_REQUEST, "Bad Request" },
@@ -863,14 +867,16 @@ static struct {
 	{ NNG_HTTP_STATUS_GONE, "Gone" },
 	{ NNG_HTTP_STATUS_LENGTH_REQUIRED, "Length Required" },
 	{ NNG_HTTP_STATUS_PRECONDITION_FAILED, "Precondition Failed" },
-	{ NNG_HTTP_STATUS_ENTITY_TOO_LONG, "Request Entity Too Long" },
+	{ NNG_HTTP_STATUS_CONTENT_TOO_LARGE, "Content Too Large" },
+	{ NNG_HTTP_STATUS_URI_TOO_LONG, "URI Too Long" },
 	{ NNG_HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE, "Unsupported Media Type" },
-	{ NNG_HTTP_STATUS_RANGE_NOT_SATISFIABLE,
-	    "Requested Range Not Satisfiable" },
+	{ NNG_HTTP_STATUS_RANGE_NOT_SATISFIABLE, "Range Not Satisfiable" },
 	{ NNG_HTTP_STATUS_EXPECTATION_FAILED, "Expectation Failed" },
 	{ NNG_HTTP_STATUS_TEAPOT, "I Am A Teapot" },
+	{ NNG_HTTP_STATUS_UNPROCESSABLE_ENTITY, "Unprocessable Entity" },
 	{ NNG_HTTP_STATUS_LOCKED, "Locked" },
 	{ NNG_HTTP_STATUS_FAILED_DEPENDENCY, "Failed Dependency" },
+	{ NNG_HTTP_STATUS_TOO_EARLY, "Too Early" },
 	{ NNG_HTTP_STATUS_UPGRADE_REQUIRED, "Upgrade Required" },
 	{ NNG_HTTP_STATUS_PRECONDITION_REQUIRED, "Precondition Required" },
 	{ NNG_HTTP_STATUS_TOO_MANY_REQUESTS, "Too Many Requests" },

@@ -247,10 +247,12 @@
 
 [`nng_http_client`]: /api/http.md#client-object
 [`nng_http`]: /api/http.md#connection-object
-[`nng_http_client_alloc`]: /TODO.md
+[`nng_http_client_alloc`]: /api/http.md#create-a-client
 [`nng_http_client_free`]: /api/http.md#destroy-a-client
-[`nng_http_client_connect`]: /api/http.md#creating-http-connections
-[`nng_http_close`]: /TODO.md
+[`nng_http_client_connect`]: /api/http.md#creating-connections
+[`nng_http_client_set_tls`]: /api/http.md#client-tls
+[`nng_http_client_get_tls`]: /api/http.md#client-tls
+[`nng_http_close`]: /api/http.md#closing-connections
 [`nng_http_get_version`]: /api/http.md#http-protocol-versions
 [`nng_http_set_version`]: /api/http.md#http-protocol-versions
 [`nng_http_get_method`]: /api/http.md#http-method
@@ -261,7 +263,7 @@
 [`nng_http_set_status`]: /TODO.md
 [`nng_http_set_reason`]: /TODO.md
 [`nng_http_get_url`]: /TODO.md
-[`nng_http_hijack`]: /TODO.md
+[`nng_http_hijack`]: /api/http.md#hijacking-connections
 [`nng_http_get_response_headers`]: /TODO.md
 [`nng_http_set_response_headers`]: /TODO.md
 [`nng_http_get_request_headers`]: /TODO.md
