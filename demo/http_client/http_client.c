@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2025 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -66,10 +66,12 @@ main(int argc, char **argv)
 	}
 
 	if (((rv = nng_init(NULL)) != 0) ||
+	    ((rv = nng_aio_alloc(&aio, NULL, NULL)) != 0) ||
 	    ((rv = nng_url_parse(&url, argv[1])) != 0) ||
 	    ((rv = nng_http_client_alloc(&client, url)) != 0) ||
 	    ((rv = nng_aio_alloc(&aio, NULL, NULL)) != 0)) {
 		fatal(rv);
+		return 1;
 	}
 
 	// Start connection process...
@@ -105,10 +107,9 @@ main(int argc, char **argv)
 		fatal(rv);
 	}
 
-	if (nng_http_res_get_status(res) != NNG_HTTP_STATUS_OK) {
+	if (nng_http_get_status(conn) != NNG_HTTP_STATUS_OK) {
 		fprintf(stderr, "HTTP Server Responded: %d %s\n",
-		    nng_http_res_get_status(res),
-		    nng_http_res_get_reason(res));
+		    nng_http_get_status(conn), nng_http_get_reason(conn));
 	}
 
 	// This only supports regular transfer encoding (no Chunked-Encoding,
@@ -134,7 +135,7 @@ main(int argc, char **argv)
 	nng_aio_set_iov(aio, 1, &iov);
 
 	// Now attempt to receive the data.
-	nng_http_conn_read_all(conn, aio);
+	nng_http_read_all(conn, aio);
 
 	// Wait for it to complete.
 	nng_aio_wait(aio);

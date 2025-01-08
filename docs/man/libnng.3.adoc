@@ -101,7 +101,7 @@ and connections.
 |===
 |xref:nng_http_conn_close.3http.adoc[nng_http_conn_close()]|close HTTP connection
 |xref:nng_http_conn_read.3http.adoc[nng_http_conn_read()]|read from HTTP connection
-|xref:nng_http_conn_read_all.3http.adoc[nng_http_conn_read_all()]|read all from HTTP connection
+|xref:nng_http_read_all.3http.adoc[nng_http_conn_all()]|read all from HTTP connection
 |xref:nng_http_conn_read_req.3http.adoc[nng_http_conn_read_req()]|read HTTP request
 |xref:nng_http_conn_read_res.3http.adoc[nng_http_conn_read_res()]|read HTTP response
 |xref:nng_http_conn_write.3http.adoc[nng_http_conn_write()]|write to HTTP connection

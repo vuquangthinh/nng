@@ -87,7 +87,7 @@ TestMain("HTTP Client", {
 				nng_aio_wait(aio);
 				So(nng_aio_result(aio) == 0);
 
-				nng_http_conn_read_all(http, aio);
+				nng_http_read_all(http, aio);
 				nng_aio_wait(aio);
 				So(nng_aio_result(aio) == 0);
 			});

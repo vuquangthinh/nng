@@ -278,6 +278,11 @@
 [`nng_http_read_request_body`]: /TODO.md
 [`nng_http_server_set_error`]: /TODO.md
 [`nng_http_server_set_redirect`]: /TODO.md
+[`nng_http_read`]: /api/http.md#direct-read-and-write
+[`nng_http_read`]: /api/http.md#direct-read-and-write
+[`nng_http_read_all`]: /api/http.md#direct-read-and-write
+[`nng_http_write`]: /api/http.md#direct-read-and-write
+[`nng_http_write_all`]: /api/http.md#direct-read-and-write
 
 <!-- Macros -->
 

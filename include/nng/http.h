@@ -193,23 +193,23 @@ NNG_DECL nng_http_res *nng_http_conn_res(nng_http_conn *);
 // not use this channel after this operation is performed.
 NNG_DECL void nng_http_close(nng_http *);
 
-// nng_http_conn_read attempts to read data from the connection.  This
+// nng_http_read attempts to read data from the connection.  This
 // completes as soon as at least one byte is read; it does not wait
 // for the entire aio to be filled.
-NNG_DECL void nng_http_conn_read(nng_http_conn *, nng_aio *);
+NNG_DECL void nng_http_read(nng_http *, nng_aio *);
 
-// nng_http_conn_read_all is like nng_http_conn_read, but it does not
+// nng_http_read_all is like nng_http_read, but it does not
 // finish until either all the requested data is read, or an error occurs.
-NNG_DECL void nng_http_conn_read_all(nng_http_conn *, nng_aio *);
+NNG_DECL void nng_http_read_all(nng_http *, nng_aio *);
 
-// nng_http_conn_write attempts to write data, but it can write less
+// nng_http_write attempts to write data, but it can write less
 // than the amount requested. (It completes as soon as at least one
 // byte is written.)
-NNG_DECL void nng_http_conn_write(nng_http_conn *, nng_aio *);
+NNG_DECL void nng_http_write(nng_http *, nng_aio *);
 
-// nng_http_conn_write_all is like nng_http_conn_write, but it does not
+// nng_http_write_all is like nng_http_write, but it does not
 // finish until either all the requested data is written, or an error occurs.
-NNG_DECL void nng_http_conn_write_all(nng_http_conn *, nng_aio *);
+NNG_DECL void nng_http_conn_write_all(nng_http *, nng_aio *);
 
 // nng_http_conn_write_req writes the entire request.  It will also write any
 // data that has been attached.

@@ -66,7 +66,7 @@ httpdo(struct server_test *st, void **datap, size_t *sizep)
 		iov.iov_buf = data;
 		iov.iov_len = clen;
 		nng_aio_set_iov(st->aio, 1, &iov);
-		nng_http_conn_read_all(st->conn, st->aio);
+		nng_http_read_all(st->conn, st->aio);
 		nng_aio_wait(st->aio);
 		if ((rv = nng_aio_result(st->aio)) != 0) {
 			return (rv);
@@ -239,7 +239,7 @@ test_server_basic(void)
 	iov.iov_len = strlen(doc1);
 	iov.iov_buf = chunk;
 	NUTS_PASS(nng_aio_set_iov(st.aio, 1, &iov));
-	nng_http_conn_read_all(st.conn, st.aio);
+	nng_http_read_all(st.conn, st.aio);
 	nng_aio_wait(st.aio);
 	NUTS_PASS(nng_aio_result(st.aio));
 	NUTS_TRUE(nng_aio_count(st.aio) == strlen(doc1));

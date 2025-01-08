@@ -173,6 +173,29 @@ including any disposing of any underlying file descriptors or related resources.
 
 Once this function, no further access to the _conn_ structure may be made.
 
+### Direct Read and Write
+
+```c
+void nng_http_read(nng_http *conn, nng_aio *aio);
+void nng_http_write(nng_http *conn, nng_aio *aio);
+void nng_http_read_all(nng_http *conn, nng_aio *aio);
+void nng_http_write_all(nng_http *conn, nng_aio *aio);
+```
+
+The {{i:`nng_http_read`}} and {{i:`nng_http_write`}} functions read or write data asynchronously from or to the
+connection _conn_, using the [`nng_iov`] that is set in _aio_ with [`nng_aio_set_iov`].
+These functions will complete as soon as any data is transferred.
+Use [`nng_aio_get_count`] to determine how much data was actually transferred.
+
+The {{i:`nng_http_read_all`}} and {{`nng_http_write_all`}} functions perform the same task, but will keep resubmitting
+operations until the the entire amount of data requested by the [`nng_iov`] is transferred.
+
+> [!NOTE]
+> These functions perform no special handling for chunked transfers.
+
+These functions are most likely to be useful after hijacking the connection with [`nng_http_hijack`].
+They can be used to transfer request or response body data as well.
+
 ### Hijacking Connections
 
 ```c

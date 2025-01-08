@@ -33,7 +33,7 @@ associated with _conn_, including all of the related headers.
 NOTE: Any HTTP entity/body data associated with the request is *not* read
 automatically.
 The caller should use
-xref:nng_http_conn_read_all.3http.adoc[`nng_http_conn_read_all()`]
+xref:nng_http_read_all.3http.adoc[`nng_http_read_all()`]
 to read the entity data, based on the details of the request itself.
 
 This function returns immediately, with no return value.

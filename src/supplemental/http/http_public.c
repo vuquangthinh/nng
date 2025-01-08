@@ -327,7 +327,7 @@ nng_http_close(nng_http_conn *conn)
 }
 
 void
-nng_http_conn_read(nng_http_conn *conn, nng_aio *aio)
+nng_http_read(nng_http *conn, nng_aio *aio)
 {
 #ifdef NNG_SUPP_HTTP
 	nni_http_read(conn, aio);
@@ -338,7 +338,7 @@ nng_http_conn_read(nng_http_conn *conn, nng_aio *aio)
 }
 
 void
-nng_http_conn_read_all(nng_http_conn *conn, nng_aio *aio)
+nng_http_read_all(nng_http *conn, nng_aio *aio)
 {
 #ifdef NNG_SUPP_HTTP
 	nni_http_read_full(conn, aio);
@@ -349,7 +349,7 @@ nng_http_conn_read_all(nng_http_conn *conn, nng_aio *aio)
 }
 
 void
-nng_http_conn_write(nng_http_conn *conn, nng_aio *aio)
+nng_http_write(nng_http *conn, nng_aio *aio)
 {
 #ifdef NNG_SUPP_HTTP
 	nni_http_write(conn, aio);
@@ -360,7 +360,7 @@ nng_http_conn_write(nng_http_conn *conn, nng_aio *aio)
 }
 
 void
-nng_http_conn_write_all(nng_http_conn *conn, nng_aio *aio)
+nng_http_write_all(nng_http *conn, nng_aio *aio)
 {
 #ifdef NNG_SUPP_HTTP
 	nni_http_write_full(conn, aio);
