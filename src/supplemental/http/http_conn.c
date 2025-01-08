@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "core/list.h"
 #include "core/nng_impl.h"
 #include "nng/http.h"
 #include "supplemental/tls/tls_api.h"
@@ -843,7 +844,7 @@ nni_http_conn_set_status(nng_http *conn, uint16_t status, const char *reason)
 }
 
 static int
-http_conn_set_error(nng_http_conn *conn, uint16_t status, const char *reason,
+http_conn_set_error(nng_http *conn, uint16_t status, const char *reason,
     const char *body, const char *redirect)
 {
 	int         rv;
@@ -899,10 +900,13 @@ http_conn_set_error(nng_http_conn *conn, uint16_t status, const char *reason,
 		body = content;
 	}
 	if (strlen(body) > 0) {
-		if ((rv = nni_http_res_set_header(&conn->res, "Content-Type",
-		         "text/html; charset=UTF-8")) != 0) {
-			return (rv);
-		}
+		(void) nni_http_res_del_header(&conn->res, "Content-Type");
+		nni_list_node_remove(&conn->res.content_type.node);
+		conn->res.content_type.name  = "Content-Type";
+		conn->res.content_type.value = "text/html; charset=UTF-8";
+		conn->res.content_type.static_name  = true;
+		conn->res.content_type.static_value = true;
+		nni_list_append(&conn->res.hdrs, &conn->res.content_type);
 		return (
 		    nni_http_res_copy_data(&conn->res, body, strlen(body)));
 	}
@@ -911,21 +915,34 @@ http_conn_set_error(nng_http_conn *conn, uint16_t status, const char *reason,
 
 int
 nni_http_conn_set_error(
-    nng_http_conn *conn, uint16_t status, const char *reason, const char *body)
+    nng_http *conn, uint16_t status, const char *reason, const char *body)
 {
 	return (http_conn_set_error(conn, status, reason, body, NULL));
 }
 
 int
-nni_http_conn_set_redirect(nng_http_conn *conn, uint16_t status,
-    const char *reason, const char *redirect)
+nni_http_conn_set_redirect(
+    nng_http *conn, uint16_t status, const char *reason, const char *redirect)
 {
-	int rv;
-	if ((rv = nni_http_res_set_header(&conn->res, "Location", redirect)) !=
-	    0) {
-		return (rv);
+	char *loc;
+	if ((loc = nni_strdup(redirect)) == NULL) {
+		return (NNG_ENOMEM);
 	}
+	(void) nni_http_res_del_header(&conn->res, "Location");
+	nni_list_node_remove(&conn->res.location.node);
+	nni_http_free_header(&conn->res.location);
+	conn->res.location.name         = "Location";
+	conn->res.location.value        = loc;
+	conn->res.location.static_name  = true;
+	conn->res.location.static_value = true;
+	nni_list_prepend(&conn->res.hdrs, &conn->res.location);
 	return (http_conn_set_error(conn, status, reason, NULL, redirect));
+}
+
+void
+nni_http_conn_set_response_content_type(nng_http *conn, const char *ctype)
+{
+	nni_http_res_set_content_type(&conn->res, ctype);
 }
 
 int

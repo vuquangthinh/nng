@@ -423,6 +423,7 @@ http_sconn_error(http_sconn *sc, uint16_t err)
 	}
 
 	if (sc->close) {
+		// TODO: Static header
 		if (nni_http_res_set_header(res, "Connection", "close") != 0) {
 			http_sconn_close(sc);
 			return;
@@ -1325,9 +1326,8 @@ http_handle_file(nng_http *conn, void *arg, nni_aio *aio)
 		nni_aio_finish(aio, 0, 0);
 		return;
 	}
-	if (((rv = nni_http_res_set_header(res, "Content-Type", ctype)) !=
-	        0) ||
-	    ((rv = nni_http_res_copy_data(res, data, size)) != 0)) {
+	nni_http_res_set_content_type(res, ctype);
+	if ((rv = nni_http_res_copy_data(res, data, size)) != 0) {
 		nni_free(data, size);
 		nni_aio_finish_error(aio, rv);
 		return;

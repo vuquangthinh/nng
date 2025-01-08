@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "core/list.h"
 #include "core/nng_impl.h"
 #include "http_api.h"
 #include "http_msg.h"
@@ -33,15 +34,29 @@ http_set_string(char **strp, const char *val)
 	return (0);
 }
 
+void
+nni_http_free_header(http_header *h)
+{
+	nni_list_node_remove(&h->node);
+	if (!h->static_name) {
+		nni_strfree(h->name);
+		h->name = NULL;
+	}
+	if (!h->static_value) {
+		nni_strfree(h->value);
+		h->value = NULL;
+	}
+	if (h->alloc_header) {
+		NNI_FREE_STRUCT(h);
+	}
+}
+
 static void
 http_headers_reset(nni_list *hdrs)
 {
 	http_header *h;
 	while ((h = nni_list_first(hdrs)) != NULL) {
-		nni_list_remove(hdrs, h);
-		nni_strfree(h->name);
-		nni_strfree(h->value);
-		NNI_FREE_STRUCT(h);
+		nni_http_free_header(h);
 	}
 }
 
@@ -91,14 +106,19 @@ http_del_header(nni_list *hdrs, const char *key)
 	http_header *h;
 	NNI_LIST_FOREACH (hdrs, h) {
 		if (nni_strcasecmp(key, h->name) == 0) {
-			nni_list_remove(hdrs, h);
-			nni_strfree(h->name);
-			nni_free(h->value, strlen(h->value) + 1);
-			NNI_FREE_STRUCT(h);
+			nni_http_free_header(h);
 			return (0);
 		}
 	}
 	return (NNG_ENOENT);
+}
+
+static void
+http_del_all_headers(nni_list *hdrs, const char *key)
+{
+	while (http_del_header(hdrs, key) == 0) {
+		continue;
+	}
 }
 
 int
@@ -132,6 +152,7 @@ http_set_header(nni_list *hdrs, const char *key, const char *val)
 	if ((h = NNI_ALLOC_STRUCT(h)) == NULL) {
 		return (NNG_ENOMEM);
 	}
+	h->alloc_header = true;
 	if ((h->name = nni_strdup(key)) == NULL) {
 		NNI_FREE_STRUCT(h);
 		return (NNG_ENOMEM);
@@ -178,6 +199,7 @@ http_add_header(nni_list *hdrs, const char *key, const char *val)
 	if ((h = NNI_ALLOC_STRUCT(h)) == NULL) {
 		return (NNG_ENOMEM);
 	}
+	h->alloc_header = true;
 	if ((h->name = nni_strdup(key)) == NULL) {
 		NNI_FREE_STRUCT(h);
 		return (NNG_ENOMEM);
@@ -264,14 +286,6 @@ http_entity_copy_data(nni_http_entity *entity, const void *data, size_t size)
 	return (rv);
 }
 
-static int
-http_set_content_length(nni_http_entity *entity, nni_list *hdrs)
-{
-	char buf[16];
-	(void) snprintf(buf, sizeof(buf), "%u", (unsigned) entity->size);
-	return (http_set_header(hdrs, "Content-Length", buf));
-}
-
 static void
 http_entity_get_data(nni_http_entity *entity, void **datap, size_t *sizep)
 {
@@ -291,29 +305,71 @@ nni_http_res_get_data(nni_http_res *res, void **datap, size_t *sizep)
 	http_entity_get_data(&res->data, datap, sizep);
 }
 
+void
+nni_http_req_set_content_length(nni_http_req *req, size_t size)
+{
+	snprintf(req->clen, sizeof(req->clen), "%lu", (unsigned long) size);
+	http_del_all_headers(&req->hdrs, "Content-Length");
+	nni_list_node_remove(&req->content_length.node);
+	req->content_length.name         = "Content-Length";
+	req->content_length.value        = req->clen;
+	req->content_length.static_name  = true;
+	req->content_length.static_value = true;
+	nni_list_append(&req->hdrs, &req->content_length);
+}
+
+void
+nni_http_res_set_content_length(nni_http_res *res, size_t size)
+{
+	snprintf(res->clen, sizeof(res->clen), "%lu", (unsigned long) size);
+	http_del_all_headers(&res->hdrs, "Content-Length");
+	nni_list_node_remove(&res->content_length.node);
+	res->content_length.name         = "Content-Length";
+	res->content_length.value        = res->clen;
+	res->content_length.static_name  = true;
+	res->content_length.static_value = true;
+	nni_list_append(&res->hdrs, &res->content_length);
+}
+
+void
+nni_http_res_set_content_type(nni_http_res *res, const char *ctype)
+{
+	http_del_all_headers(&res->hdrs, "Content-Type");
+	nni_list_node_remove(&res->content_type.node);
+	res->content_type.name           = "Content-Type";
+	res->content_type.value          = (char *) ctype;
+	res->content_length.static_name  = true;
+	res->content_length.static_value = true;
+	nni_list_append(&res->hdrs, &res->content_type);
+}
+
+void
+nni_http_req_set_content_type(nni_http_req *req, const char *ctype)
+{
+	http_del_all_headers(&req->hdrs, "Content-Type");
+	nni_list_node_remove(&req->content_type.node);
+	req->content_type.name           = "Content-Type";
+	req->content_type.value          = (char *) ctype;
+	req->content_length.static_name  = true;
+	req->content_length.static_value = true;
+	nni_list_append(&req->hdrs, &req->content_type);
+}
+
 int
 nni_http_req_set_data(nni_http_req *req, const void *data, size_t size)
 {
-	int rv;
-
 	http_entity_set_data(&req->data, data, size);
-	if ((rv = http_set_content_length(&req->data, &req->hdrs)) != 0) {
-		http_entity_set_data(&req->data, NULL, 0);
-	}
-	return (rv);
+	nni_http_req_set_content_length(req, size);
+	return (0);
 }
 
 int
 nni_http_res_set_data(nni_http_res *res, const void *data, size_t size)
 {
-	int rv;
-
 	http_entity_set_data(&res->data, data, size);
-	if ((rv = http_set_content_length(&res->data, &res->hdrs)) != 0) {
-		http_entity_set_data(&res->data, NULL, 0);
-	}
+	nni_http_res_set_content_length(res, size);
 	res->iserr = false;
-	return (rv);
+	return (0);
 }
 
 int
@@ -321,11 +377,10 @@ nni_http_req_copy_data(nni_http_req *req, const void *data, size_t size)
 {
 	int rv;
 
-	if (((rv = http_entity_copy_data(&req->data, data, size)) != 0) ||
-	    ((rv = http_set_content_length(&req->data, &req->hdrs)) != 0)) {
-		http_entity_set_data(&req->data, NULL, 0);
+	if ((rv = http_entity_copy_data(&req->data, data, size)) != 0) {
 		return (rv);
 	}
+	nni_http_req_set_content_length(req, size);
 	return (0);
 }
 
@@ -345,11 +400,10 @@ nni_http_res_copy_data(nni_http_res *res, const void *data, size_t size)
 {
 	int rv;
 
-	if (((rv = http_entity_copy_data(&res->data, data, size)) != 0) ||
-	    ((rv = http_set_content_length(&res->data, &res->hdrs)) != 0)) {
-		http_entity_set_data(&res->data, NULL, 0);
+	if ((rv = http_entity_copy_data(&res->data, data, size)) != 0) {
 		return (rv);
 	}
+	nni_http_res_set_content_length(res, size);
 	res->iserr = false;
 	return (0);
 }

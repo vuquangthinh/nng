@@ -133,6 +133,8 @@ extern int nni_http_res_set_data(nni_http_res *, const void *, size_t);
 extern int nni_http_req_alloc_data(nni_http_req *, size_t);
 extern int nni_http_res_alloc_data(nni_http_res *, size_t);
 extern const char *nni_http_req_get_uri(const nni_http_req *);
+extern void        nni_http_res_set_content_type(nni_http_res *, const char *);
+extern void        nni_http_req_set_content_type(nni_http_req *, const char *);
 
 extern int nni_http_req_set_uri(nni_http_req *, const char *);
 extern int nni_http_req_set_url(nni_http_req *, const nng_url *);
@@ -388,5 +390,8 @@ extern int nni_http_conn_set_error(
 // sets the response Location: header accordingly.
 extern int nni_http_conn_set_redirect(
     nng_http *conn, uint16_t status, const char *reason, const char *dest);
+
+extern void nni_http_conn_set_response_content_type(
+    nng_http_conn *conn, const char *ctype);
 
 #endif // NNG_SUPPLEMENTAL_HTTP_HTTP_API_H
