@@ -183,7 +183,7 @@ TestMain("HTTP Client", {
 		nng_url         *url;
 		nng_http_req    *req;
 		nng_http_res    *res;
-		nng_http_conn   *conn;
+		nng_http        *conn;
 
 		So(nng_aio_alloc(&aio, NULL, NULL) == 0);
 
@@ -203,8 +203,8 @@ TestMain("HTTP Client", {
 		});
 		nng_aio_set_timeout(aio, 10); // 10 msec timeout
 
-		So(nng_http_req_set_header(req, "Cache-Control", "no-cache") ==
-		    0);
+		So(nng_http_set_request_header(
+		       conn, "Cache-Control", "no-cache") == 0);
 		nng_http_conn_transact(conn, aio);
 		nng_aio_wait(aio);
 		So(nng_aio_result(aio) == NNG_ETIMEDOUT);

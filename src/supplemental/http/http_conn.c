@@ -512,11 +512,21 @@ http_wr_submit(nni_http_conn *conn, nni_aio *aio, enum write_flavor flavor)
 }
 
 void
+nni_http_conn_reset(nng_http_conn *conn)
+{
+	nni_http_req_reset(&conn->req);
+	nni_http_res_reset(&conn->res);
+	if (strlen(conn->req.host)) {
+		nni_http_conn_set_host(conn, conn->req.host);
+	}
+}
+
+void
 nni_http_read_req(nni_http_conn *conn, nni_aio *aio)
 {
 	// clear the sent flag (used for the server)
 	conn->res_sent = false;
-	nni_http_req_reset(&conn->req);
+	nni_http_conn_reset(conn);
 	nni_mtx_lock(&conn->mtx);
 	http_rd_submit(conn, aio, HTTP_RD_REQ);
 	nni_mtx_unlock(&conn->mtx);
@@ -940,6 +950,51 @@ nni_http_conn_set_redirect(
 }
 
 void
+nni_http_conn_set_host(nng_http_conn *conn, const char *host)
+{
+	if (host != conn->req.host) {
+		snprintf(conn->req.host, sizeof(conn->req.host), "%s", host);
+	}
+	nni_list_node_remove(&conn->req.host_header.node);
+	conn->req.host_header.name         = "Host";
+	conn->req.host_header.value        = conn->req.host;
+	conn->req.host_header.static_name  = true;
+	conn->req.host_header.static_value = true;
+	conn->req.host_header.alloc_header = false;
+	nni_list_prepend(&conn->req.hdrs, &conn->req.host_header);
+}
+
+static bool
+http_set_request_known_header(nng_http *conn, const char *key, const char *val)
+{
+	if (nni_strcasecmp(key, "Host") == 0) {
+		nni_http_conn_set_host(conn, val);
+		return (true);
+	}
+	return (false);
+}
+
+int
+nni_http_add_request_header(nng_http *conn, const char *key, const char *val)
+{
+	if (http_set_request_known_header(conn, key, val)) {
+		return (0);
+	}
+
+	return (nni_http_req_add_header(&conn->req, key, val));
+}
+
+int
+nni_http_set_request_header(nng_http *conn, const char *key, const char *val)
+{
+	if (http_set_request_known_header(conn, key, val)) {
+		return (0);
+	}
+
+	return (nni_http_req_set_header(&conn->req, key, val));
+}
+
+void
 nni_http_conn_set_response_content_type(nng_http *conn, const char *ctype)
 {
 	nni_http_res_set_content_type(&conn->res, ctype);
@@ -976,8 +1031,7 @@ nni_http_conn_fini(nni_http_conn *conn)
 
 	nni_aio_fini(&conn->wr_aio);
 	nni_aio_fini(&conn->rd_aio);
-	nni_http_req_reset(&conn->req);
-	nni_http_res_reset(&conn->res);
+	nni_http_conn_reset(conn);
 	nni_free(conn->rd_buf, conn->rd_bufsz);
 	nni_mtx_fini(&conn->mtx);
 	NNI_FREE_STRUCT(conn);

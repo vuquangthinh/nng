@@ -173,6 +173,27 @@ including any disposing of any underlying file descriptors or related resources.
 
 Once this function, no further access to the _conn_ structure may be made.
 
+### Reset Connection State
+
+```c
+void nng_http_reset(nng_http *conn);
+```
+
+The {{i:`nng_http_reset`}} function resets the request and response state of the
+the connection _conn_.
+
+The "Host" parameter will be retained for client connections, but the URI will not.
+
+The intended purpose of this function is to clear the object state before reusing the _conn_ for
+subsequent transactions.
+
+### Request and Response Headers
+
+```c
+int nng_http_request_add_header(nng_http *conn, const char *key, const char *val);
+int nng_http_request_set_header(nng_http *conn, const char *key, const char *val);
+```
+
 ### Direct Read and Write
 
 ```c

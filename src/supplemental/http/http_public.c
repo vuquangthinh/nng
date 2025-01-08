@@ -40,12 +40,25 @@ nng_http_res_get_header(const nng_http_res *res, const char *key)
 }
 
 int
-nng_http_req_add_header(nng_http_req *req, const char *key, const char *val)
+nng_http_add_request_header(nng_http *conn, const char *key, const char *val)
 {
 #ifdef NNG_SUPP_HTTP
-	return (nni_http_req_add_header(req, key, val));
+	return (nni_http_add_request_header(conn, key, val));
 #else
-	NNI_ARG_UNUSED(req);
+	NNI_ARG_UNUSED(conn);
+	NNI_ARG_UNUSED(key);
+	NNI_ARG_UNUSED(val);
+	return (NNG_ENOTSUP);
+#endif
+}
+
+int
+nng_http_set_request_header(nng_http *conn, const char *key, const char *val)
+{
+#ifdef NNG_SUPP_HTTP
+	return (nni_http_set_request_header(conn, key, val));
+#else
+	NNI_ARG_UNUSED(conn);
 	NNI_ARG_UNUSED(key);
 	NNI_ARG_UNUSED(val);
 	return (NNG_ENOTSUP);
@@ -59,19 +72,6 @@ nng_http_res_add_header(nng_http_res *res, const char *key, const char *val)
 	return (nni_http_res_add_header(res, key, val));
 #else
 	NNI_ARG_UNUSED(res);
-	NNI_ARG_UNUSED(key);
-	NNI_ARG_UNUSED(val);
-	return (NNG_ENOTSUP);
-#endif
-}
-
-int
-nng_http_req_set_header(nng_http_req *req, const char *key, const char *val)
-{
-#ifdef NNG_SUPP_HTTP
-	return (nni_http_req_set_header(req, key, val));
-#else
-	NNI_ARG_UNUSED(req);
 	NNI_ARG_UNUSED(key);
 	NNI_ARG_UNUSED(val);
 	return (NNG_ENOTSUP);
@@ -791,8 +791,7 @@ void
 nng_http_reset(nng_http *conn)
 {
 #ifdef NNG_SUPP_HTTP
-	nni_http_req_reset(nni_http_conn_req(conn));
-	nni_http_res_reset(nni_http_conn_res(conn));
+	nni_http_conn_reset(conn);
 #else
 	NNI_ARG_UNUSED(req);
 #endif

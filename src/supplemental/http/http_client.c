@@ -10,12 +10,14 @@
 //
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "core/nng_impl.h"
 
 #include "http_api.h"
+#include "http_msg.h"
 
 static nni_mtx http_txn_lk = NNI_MTX_INITIALIZER;
 
@@ -24,6 +26,7 @@ struct nng_http_client {
 	nni_mtx            mtx;
 	bool               closed;
 	nni_aio            aio;
+	char               host[260];
 	nng_stream_dialer *dialer;
 };
 
@@ -71,6 +74,8 @@ http_dial_cb(void *arg)
 	NNI_ASSERT(stream != NULL);
 
 	rv = nni_http_conn_init(&conn, stream);
+
+	// set up the host header
 	http_dial_start(c);
 	nni_mtx_unlock(&c->mtx);
 
@@ -79,7 +84,7 @@ http_dial_cb(void *arg)
 		nni_aio_finish_error(aio, rv);
 		return;
 	}
-
+	nni_http_conn_set_host(conn, c->host);
 	nni_aio_set_output(aio, 0, conn);
 	nni_aio_finish(aio, 0, 0);
 }
@@ -110,7 +115,8 @@ nni_http_client_init(nni_http_client **cp, const nng_url *url)
 	memcpy(&my_url, url, sizeof(my_url));
 	my_url.u_scheme = (char *) scheme;
 
-	if (strlen(url->u_hostname) == 0) {
+	if ((strlen(url->u_hostname) == 0) ||
+	    (strlen(url->u_hostname) > 253)) {
 		// We require a valid hostname.
 		return (NNG_EADDRINVAL);
 	}
@@ -122,6 +128,16 @@ nni_http_client_init(nni_http_client **cp, const nng_url *url)
 	nni_aio_list_init(&c->aios);
 	nni_aio_init(&c->aio, http_dial_cb, c);
 
+	if (nni_url_default_port(url->u_scheme) == url->u_port) {
+		snprintf(c->host, sizeof(c->host), "%s", url->u_hostname);
+	} else if (strchr(url->u_hostname, ':') != NULL) {
+		// IPv6 address, needs [wrapping]
+		snprintf(c->host, sizeof(c->host), "[%s]:%d", url->u_hostname,
+		    url->u_port);
+	} else {
+		snprintf(c->host, sizeof(c->host), "%s:%d", url->u_hostname,
+		    url->u_port);
+	}
 	if ((rv = nng_stream_dialer_alloc_url(&c->dialer, &my_url)) != 0) {
 		nni_http_client_fini(c);
 		return (rv);

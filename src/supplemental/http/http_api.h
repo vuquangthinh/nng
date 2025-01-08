@@ -392,6 +392,13 @@ extern int nni_http_conn_set_redirect(
     nng_http *conn, uint16_t status, const char *reason, const char *dest);
 
 extern void nni_http_conn_set_response_content_type(
-    nng_http_conn *conn, const char *ctype);
+    nng_http *conn, const char *ctype);
+
+extern void nni_http_conn_set_host(nng_http *conn, const char *);
+extern void nni_http_conn_reset(nng_http *conn);
+extern int  nni_http_add_request_header(
+     nng_http *conn, const char *key, const char *val);
+extern int nni_http_set_request_header(
+    nng_http *conn, const char *key, const char *val);
 
 #endif // NNG_SUPPLEMENTAL_HTTP_HTTP_API_H

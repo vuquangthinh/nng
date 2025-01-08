@@ -38,14 +38,16 @@ struct nng_http_req {
 	nni_list        hdrs;
 	nni_http_entity data;
 	char            meth[32];
+	char            clen[28];
+	char            host[260]; // 253 per IETF, plus 6 for :port plus null
 	char           *uri;
 	const char     *vers;
 	char           *buf;
 	size_t          bufsz;
 	bool            parsed;
-	char            clen[28];
 	http_header     content_type;
 	http_header     content_length;
+	http_header     host_header;
 };
 
 struct nng_http_res {

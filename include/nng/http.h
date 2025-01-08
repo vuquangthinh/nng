@@ -100,16 +100,6 @@ typedef struct nng_http_req nng_http_req;
 // the scheme, host, or port.
 NNG_DECL const char *nng_http_req_get_uri(const nng_http_req *);
 
-// nng_http_req_set_header sets an HTTP header, replacing any previous value
-// that might have been present.
-NNG_DECL int nng_http_req_set_header(
-    nng_http_req *, const char *, const char *);
-
-// nng_http_req_add_header adds an HTTP header, without disrupting any other
-// with the same name that might have been present.
-NNG_DECL int nng_http_req_add_header(
-    nng_http_req *, const char *, const char *);
-
 // nng_http_req_del_header deletes all occurrences of a named header.
 NNG_DECL int nng_http_req_del_header(nng_http_req *, const char *);
 
@@ -209,7 +199,7 @@ NNG_DECL void nng_http_write(nng_http *, nng_aio *);
 
 // nng_http_write_all is like nng_http_write, but it does not
 // finish until either all the requested data is written, or an error occurs.
-NNG_DECL void nng_http_conn_write_all(nng_http *, nng_aio *);
+NNG_DECL void nng_http_write_all(nng_http *, nng_aio *);
 
 // nng_http_conn_write_req writes the entire request.  It will also write any
 // data that has been attached.
@@ -260,6 +250,9 @@ NNG_DECL void nng_http_set_method(nng_http *, const char *);
 
 // nng_http_get_method returns the method.
 NNG_DECL const char *nng_http_get_method(nng_http *);
+
+NNG_DECL int nng_http_add_request_header(
+    nng_http *, const char *, const char *);
 
 // nng_http_handler is a handler used on the server side to handle HTTP
 // requests coming into a specific URL.

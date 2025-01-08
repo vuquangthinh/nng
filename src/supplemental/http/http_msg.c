@@ -113,37 +113,41 @@ http_del_header(nni_list *hdrs, const char *key)
 	return (NNG_ENOENT);
 }
 
-static void
-http_del_all_headers(nni_list *hdrs, const char *key)
-{
-	while (http_del_header(hdrs, key) == 0) {
-		continue;
-	}
-}
-
 int
 nni_http_req_del_header(nni_http_req *req, const char *key)
 {
-	return (http_del_header(&req->hdrs, key));
+	int rv = NNG_ENOENT;
+	while (http_del_header(&req->hdrs, key) == 0) {
+		rv = 0;
+	}
+	return (rv);
 }
 
 int
 nni_http_res_del_header(nni_http_res *res, const char *key)
 {
-	return (http_del_header(&res->hdrs, key));
+	int rv = NNG_ENOENT;
+	while (http_del_header(&res->hdrs, key) == 0) {
+		rv = 0;
+	}
+	return (rv);
 }
 
 static int
 http_set_header(nni_list *hdrs, const char *key, const char *val)
 {
 	http_header *h;
+
 	NNI_LIST_FOREACH (hdrs, h) {
 		if (nni_strcasecmp(key, h->name) == 0) {
 			char *news;
 			if ((news = nni_strdup(val)) == NULL) {
 				return (NNG_ENOMEM);
 			}
-			nni_strfree(h->value);
+			if (!h->static_value) {
+				nni_strfree(h->value);
+				h->value = NULL;
+			}
 			h->value = news;
 			return (0);
 		}
@@ -309,7 +313,7 @@ void
 nni_http_req_set_content_length(nni_http_req *req, size_t size)
 {
 	snprintf(req->clen, sizeof(req->clen), "%lu", (unsigned long) size);
-	http_del_all_headers(&req->hdrs, "Content-Length");
+	nni_http_req_del_header(req, "Content-Length");
 	nni_list_node_remove(&req->content_length.node);
 	req->content_length.name         = "Content-Length";
 	req->content_length.value        = req->clen;
@@ -322,7 +326,7 @@ void
 nni_http_res_set_content_length(nni_http_res *res, size_t size)
 {
 	snprintf(res->clen, sizeof(res->clen), "%lu", (unsigned long) size);
-	http_del_all_headers(&res->hdrs, "Content-Length");
+	nni_http_res_del_header(res, "Content-Length");
 	nni_list_node_remove(&res->content_length.node);
 	res->content_length.name         = "Content-Length";
 	res->content_length.value        = res->clen;
@@ -334,7 +338,7 @@ nni_http_res_set_content_length(nni_http_res *res, size_t size)
 void
 nni_http_res_set_content_type(nni_http_res *res, const char *ctype)
 {
-	http_del_all_headers(&res->hdrs, "Content-Type");
+	nni_http_res_del_header(res, "Content-Type");
 	nni_list_node_remove(&res->content_type.node);
 	res->content_type.name           = "Content-Type";
 	res->content_type.value          = (char *) ctype;
@@ -346,7 +350,7 @@ nni_http_res_set_content_type(nni_http_res *res, const char *ctype)
 void
 nni_http_req_set_content_type(nni_http_req *req, const char *ctype)
 {
-	http_del_all_headers(&req->hdrs, "Content-Type");
+	nni_http_req_del_header(req, "Content-Type");
 	nni_list_node_remove(&req->content_type.node);
 	req->content_type.name           = "Content-Type";
 	req->content_type.value          = (char *) ctype;

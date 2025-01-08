@@ -253,6 +253,7 @@
 [`nng_http_client_set_tls`]: /api/http.md#client-tls
 [`nng_http_client_get_tls`]: /api/http.md#client-tls
 [`nng_http_close`]: /api/http.md#closing-connections
+[`nng_http_reset`]: /api/http.md#reset-connection-state
 [`nng_http_get_version`]: /api/http.md#http-protocol-versions
 [`nng_http_set_version`]: /api/http.md#http-protocol-versions
 [`nng_http_get_method`]: /api/http.md#http-method

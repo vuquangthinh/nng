@@ -52,7 +52,6 @@ main(int argc, char **argv)
 	nng_http_conn   *conn;
 	nng_url         *url;
 	nng_aio         *aio;
-	nng_http_req    *req;
 	nng_http_res    *res;
 	const char      *hdr;
 	int              rv;
@@ -86,7 +85,6 @@ main(int argc, char **argv)
 	// Get the connection, at the 0th output.
 	conn = nng_aio_get_output(aio, 0);
 	res  = nng_http_conn_res(conn);
-	req  = nng_http_conn_req(conn);
 
 	// Request is already set up with URL, and for GET via HTTP/1.1.
 	// The Host: header is already set up too.
